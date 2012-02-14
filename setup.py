@@ -11,10 +11,10 @@ from setuptools import setup
 
 PROJECT = u'Blueprint'
 VERSION = '0.1'
-URL = 'https://github.com/eykd/blueprint'
+URL = u'https://github.com/eykd/blueprint'
 AUTHOR = u'David Eyk'
 AUTHOR_EMAIL = u'david.eyk@gmail.com'
-DESC = "Magical blueprints for procedural generation of content."
+DESC = u"Magical blueprints for procedural generation of content."
 
 def read_file(file_name):
     file_path = os.path.join(
