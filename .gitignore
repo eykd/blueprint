@@ -1,3 +1,4 @@
 *.pyc
 dist/
 Blueprint.egg-info/
+python_blueprint.egg-info/

@@ -6,7 +6,7 @@ Magical blueprints for procedural generation of content. Based roughly
 on http://www.squidi.net/mapmaker/musings/m100402.php
 
 The essential idea is that you write subclasses of
-`blueprint.Blueprint` with fields that define the general parameters
+``blueprint.Blueprint`` with fields that define the general parameters
 of their values (e.g. an integer between 0 and 10). When you
 instantiate a blueprint, you get a "mastered" blueprint with
 well-defined values for each field. Mastered blueprints may define
@@ -81,15 +81,15 @@ Tags
 
 Blueprints automatically organize themselves using tags. A direct
 descendant of Blueprint has its own tag repository
-(`blueprint.taggables.TagRepository`), which all its subclasses will
+(``blueprint.taggables.TagRepository``), which all its subclasses will
 share. So, in the above example, you can query
-`Weapon.tag_repo.query(with_tags=('piercing'))` and receive
-`set([Spear, PointedStick])`.
+``Weapon.tag_repo.query(with_tags=('piercing'))`` and receive
+``set([Spear, PointedStick])``.
 
 Blueprints are also automatically tagged by their class name (and
 their ancestor superclass names!), with camel-cased words separated
-out. So `CaveMan` will automatically get the tags `set(['cave', 'man',
-'actor'])`.
+out. So ``CaveMan`` will automatically get the tags ``set(['cave', 'man',
+'actor'])``.
 
 This makes the following possible::
 
