@@ -9,12 +9,12 @@ import os
 from setuptools import setup
 
 
-PROJECT = u'Blueprint'
+PROJECT = 'Blueprint'
 VERSION = '0.1'
-URL = u'https://github.com/eykd/blueprint'
-AUTHOR = u'David Eyk'
-AUTHOR_EMAIL = u'david.eyk@gmail.com'
-DESC = u"Magical blueprints for procedural generation of content."
+URL = 'https://github.com/eykd/blueprint'
+AUTHOR = 'David Eyk'
+AUTHOR_EMAIL = 'david.eyk@gmail.com'
+DESC = "Magical blueprints for procedural generation of content."
 
 def read_file(file_name):
     file_path = os.path.join(
@@ -32,19 +32,11 @@ setup(
     author_email=AUTHOR_EMAIL,
     url=URL,
     license=read_file('LICENSE'),
-    namespace_packages=[],
     packages=[u'blueprint'],
-    package_dir = {'': os.path.dirname(__file__)},
     include_package_data=True,
     zip_safe=False,
-    install_requires=[
-        # -*- Requirements -*-
-    ],
-    entry_points = {
-        # -*- Entry points -*-
-    },
     classifiers=[
-    	# see http://pypi.python.org/pypi?:action=list_classifiers
+        # see http://pypi.python.org/pypi?:action=list_classifiers
         # -*- Classifiers -*- 
         "Programming Language :: Python",
         "Topic :: Games/Entertainment",
