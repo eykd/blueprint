@@ -9,7 +9,7 @@ import os
 from setuptools import setup
 
 
-PROJECT = 'Blueprint'
+PROJECT = 'python-blueprint'
 VERSION = '0.1'
 URL = 'https://github.com/eykd/blueprint'
 AUTHOR = 'David Eyk'
