@@ -45,8 +45,8 @@ class BlueprintMeta(type):
     def __new__(cls, name, bases, attrs):
         new_class = super(BlueprintMeta, cls).__new__(cls, name, bases, {})
         new_class.tags = attrs.pop('tags', '')
-        for name, value in attrs.iteritems():
-            new_class.add_to_class(name, value)
+
+        # Set up Meta options
         meta = new_class.meta = Meta()
         if 'Meta' in attrs:
             usermeta = attrs.pop('Meta')
@@ -57,6 +57,11 @@ class BlueprintMeta(type):
         for base in bases:
             if hasattr(base, 'meta'):
                 meta.fields.update(base.meta.fields)
+
+        # Transfer the rest of the attributes.
+        for name, value in attrs.iteritems():
+            new_class.add_to_class(name, value)
+
         new_class.parent = None
         return new_class
 
