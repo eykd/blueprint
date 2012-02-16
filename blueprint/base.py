@@ -76,11 +76,19 @@ class Blueprint(taggables.TaggableClass):
     __metaclass__ = BlueprintMeta
 
     def __repr__(self):
-        return '<%s:\n    %s\n    >' % (self.__class__.__name__, '\n    '.join('%s -- %s' % (n,
-                                                                                             '\n'.join('    %s' % i
-                                                                                                       for i in repr(
-                                                                                                           getattr(self, n)).splitlines()).strip())
-                                                                               for n in sorted(self.meta.fields)))
+        return '<%s:\n    %s\n    >' % (
+            self.__class__.__name__,
+            '\n    '.join(
+                '%s -- %s' % (
+                    n,
+                    '\n'.join(
+                        '    %s' % i
+                        for i in repr(getattr(self, n)).splitlines()
+                        ).strip()
+                    )
+                for n in sorted(self.meta.fields)
+                )
+            )
 
     def __init__(self, parent=None, seed=None, **kwargs):
         if parent is not None:
