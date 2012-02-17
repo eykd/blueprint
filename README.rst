@@ -167,7 +167,7 @@ HELP
 ====
 
 If you run into trouble, or find a bug, file an issue in the `tracker
-on github <https://github.com/eykd/blueprint/issues>`.
+on github <https://github.com/eykd/blueprint/issues>`_.
 
 On github, bleeding-edge development work is done on the ``develop``
 branch. ``master`` *should* always be stable.
