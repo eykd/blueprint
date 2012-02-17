@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """blueprints_steps -- behavior steps for blueprint features.
 """
+from behave import given, when, then
+
 
 @given(u'I have imported the blueprints module')
 def step(context):

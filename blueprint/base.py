@@ -15,6 +15,19 @@ class Meta(object):
     def __init__(self):
         self.fields = set()
         self.mastered = False
+        self.source = None
+        
+        self.random = random.Random()
+        self.seed = random.random()
+        self.random.seed(self.seed)
+
+    def __depcopy__(self, memo):
+        meta = Meta()
+        for name, value in self.__dict__.iteritems():
+            if name == 'source':
+                setattr(meta, name, value)
+            else:
+                setattr(meta, name, copy.deepcopy(value, memo))
 
 camelcase_cp = re.compile(r'[A-Z][^A-Z]+')
 
@@ -43,10 +56,12 @@ class BlueprintMeta(type):
             cls.tag_repo.addObject(cls)
 
     def __new__(cls, name, bases, attrs):
-        new_class = super(BlueprintMeta, cls).__new__(cls, name, bases, {})
+        _new = attrs.pop('__new__', None)
+        new_attrs = {'__new__': _new} if _new is not None else {}
+        new_class = super(BlueprintMeta, cls).__new__(cls, name, bases, new_attrs)
         new_class.tags = attrs.pop('tags', '')
-        for name, value in attrs.iteritems():
-            new_class.add_to_class(name, value)
+
+        # Set up Meta options
         meta = new_class.meta = Meta()
         if 'Meta' in attrs:
             usermeta = attrs.pop('Meta')
@@ -57,6 +72,11 @@ class BlueprintMeta(type):
         for base in bases:
             if hasattr(base, 'meta'):
                 meta.fields.update(base.meta.fields)
+
+        # Transfer the rest of the attributes.
+        for name, value in attrs.iteritems():
+            new_class.add_to_class(name, value)
+
         new_class.parent = None
         return new_class
 
@@ -71,22 +91,30 @@ class Blueprint(taggables.TaggableClass):
     __metaclass__ = BlueprintMeta
 
     def __repr__(self):
-        return '<%s:\n    %s\n    >' % (self.__class__.__name__, '\n    '.join('%s -- %s' % (n,
-                                                                                             '\n'.join('    %s' % i
-                                                                                                       for i in repr(
-                                                                                                           getattr(self, n)).splitlines()).strip())
-                                                                               for n in sorted(self.meta.fields)))
+        return '<%s:\n    %s\n    >' % (
+            self.__class__.__name__,
+            '\n    '.join(
+                '%s -- %s' % (
+                    n,
+                    '\n'.join(
+                        '    %s' % i
+                        for i in repr(getattr(self, n)).splitlines()
+                        ).strip()
+                    )
+                for n in sorted(self.meta.fields)
+                )
+            )
 
     def __init__(self, parent=None, seed=None, **kwargs):
         if parent is not None:
             self.parent = parent
-        self.meta = copy.copy(self.meta)
+        self.meta = copy.deepcopy(self.meta)
         self.meta.mastered = True
-        if seed is None:
-            self.meta.seed = random.getstate()
-        else:
+        if seed is not None:
             self.meta.seed = seed
-            random.setstate(seed)
+        else:
+            self.meta.seed = random.random()
+        self.meta.random.seed(self.meta.seed)
         self.meta.kwargs = kwargs
         for name, value in kwargs.iteritems():
             setattr(self, name, value)
