@@ -159,5 +159,4 @@ TODO
 ====
 
 - Better documentation. :\)
-- Mods
 - Factories (more metaclass magic!!! >:)
