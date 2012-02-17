@@ -2,9 +2,11 @@
 """blueprint.fields
 """
 import random
+import operator
 
 __all__ = ['Field', 'RandomInt', 'PickOne', 'PickFrom', 'All',
-           'FormatTemplate', 'WithTags', 'generator', 'depends_on']
+           'FormatTemplate', 'WithTags',
+           'generator', 'depends_on', 'resolve']
 
 
 class Field(object):
@@ -13,6 +15,73 @@ class Field(object):
 
     def __str__(self):
         return ''
+
+    def __add__(self, b):
+        return Add(self, b)
+
+    def __radd__(self, a):
+        return Add(a, self)
+
+    def __sub__(self, b):
+        return Subtract(self, b)
+
+    def __rsub__(self, a):
+        return Subtract(a, self)
+
+    def __mul__(self, b):
+        return Multiply(self, b)
+
+    def __rmul__(self, a):
+        return Multiply(a, self)
+
+    def __div__(self, b):
+        return Divide(self, b)
+
+    def __rdiv__(self, a):
+        return Divide(a, self)
+
+
+class _Operator(object):
+    op = None
+    sym = ''
+    
+    def __init__(self, *items):
+        self.items = items
+
+    def __repr__(self):
+        return '(%s)' % (self.__class__.__name__, str(self))
+
+    def __str__(self):
+        return (' %s ' % self.sym).join(repr(i) for i in self.items)
+
+    def __call__(self, parent):
+        result = None
+        for item in self.items:
+            if result is None:
+                result = resolve(parent, item)
+            else:
+                result = self.op(result, resolve(parent, item))
+        return result
+
+
+class Add(_Operator):
+    op = operator.add
+    sym = '+'
+
+
+class Subtract(_Operator):
+    op = operator.sub
+    sym = '-'
+
+
+class Multiply(_Operator):
+    op = operator.mul
+    sym = '*'
+
+
+class Divide(_Operator):
+    op = operator.div
+    sym = '/'
 
 
 class RandomInt(Field):
@@ -82,7 +151,7 @@ class FormatTemplate(Field):
         if parent is None:
             return self
         
-        fields = {}
+        fields = {'meta': parent.meta}
         for name in parent.meta.fields:
             if getattr(parent.__class__, name) is not self:
                 fields[name] = getattr(parent, name)
@@ -142,3 +211,12 @@ def depends_on(*names):
         return func
 
     return wrap
+
+
+def resolve(parent, field):
+    """Resolve a field with the given parent instance.
+    """
+    if callable(field):
+        return field(parent)
+    else:
+        return field

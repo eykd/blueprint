@@ -134,6 +134,27 @@ This makes the following possible::
 
 
 ====
+Mods
+====
+
+Sometimes, you'll want to dynamically modify a blueprint. To do this,
+create a subclass of ``Mod``. Mods are just special blueprints::
+
+    
+    class OfDoom(blueprint.Mod):
+        name = blueprint.FormatTemplate('{meta.source.name} of DOOM')
+        value = lambda _: _.meta.source.value * 5
+
+
+Then, apply it to another blueprint::
+
+    >>> ClubOfDoom = OfDoom(Club)
+    >>> club = ClubOfDoom()
+    >>> club.name
+    'Big Club of DOOM'
+
+
+====
 TODO
 ====
 

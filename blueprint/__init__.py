@@ -9,5 +9,9 @@ import taggables
 
 from base import *
 from fields import *
+from mods import *
 
-__all__ = list(base.__all__) + fields.__all__ + ['base', 'fields']
+__all__ = list(base.__all__) \
+          + fields.__all__ \
+          + mods.__all__ \
+          + ['base', 'fields']
