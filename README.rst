@@ -3,7 +3,10 @@ Blueprint
 =========
 
 Magical blueprints for procedural generation of content. Based roughly
-on http://www.squidi.net/mapmaker/musings/m100402.php
+on a `series of articles`_ by Sean Norman. `Overview here`_.
+
+.. _series of articles: http://www.squidi.net/mapmaker/index.php
+.. _Overview here: http://www.squidi.net/mapmaker/musings/m100402.php
 
 Blueprints are data objects. The essential idea is that you write
 subclasses of ``blueprint.Blueprint`` with fields that define the
@@ -135,4 +138,5 @@ TODO
 ====
 
 - Better documentation. :\)
+- Mods
 - Factories (more metaclass magic!!! >:)
