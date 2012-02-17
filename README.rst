@@ -8,6 +8,17 @@ on a `series of articles`_ by Sean Norman. `Overview here`_.
 .. _series of articles: http://www.squidi.net/mapmaker/index.php
 .. _Overview here: http://www.squidi.net/mapmaker/musings/m100402.php
 
+- `Introduction`_
+- `Fields and Generators`_
+- `Tags`_
+- `Mods`_
+- `TODO`_
+- `HELP`_
+
+============
+Introduction
+============
+
 Blueprints are data objects. The essential idea is that you write
 subclasses of ``blueprint.Blueprint`` with fields that define the
 general parameters of their values (e.g. an integer between 0 and
@@ -167,7 +178,7 @@ HELP
 ====
 
 If you run into trouble, or find a bug, file an issue in the `tracker
-on github <https://github.com/eykd/blueprint/issues>`.
+on github <https://github.com/eykd/blueprint/issues>`_.
 
 On github, bleeding-edge development work is done on the ``develop``
 branch. ``master`` *should* always be stable.
