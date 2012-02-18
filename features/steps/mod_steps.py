@@ -13,6 +13,16 @@ def step(context):
 
     context.OfDoom = OfDoom
 
+    class MagicalItemPrefix(context.blueprint.Mod):
+        prefix = context.blueprint.PickOne(
+            'Gnarled',
+            'Inscribed',
+            'Magnificent',
+            )
+        name = context.blueprint.depends_on('prefix')(
+            context.blueprint.FormatTemplate('{parent.prefix} {meta.source.name}'))
+    context.MagicalItemPrefix = MagicalItemPrefix
+
 
 @then(u'I can mod a Club to create a modified Club of DOOM')
 def step(context):
