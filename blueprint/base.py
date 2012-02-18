@@ -16,18 +16,26 @@ class Meta(object):
         self.fields = set()
         self.mastered = False
         self.source = None
+        self.parent = None
         
         self.random = random.Random()
         self.seed = random.random()
         self.random.seed(self.seed)
 
-    def __depcopy__(self, memo):
+    def __deepcopy__(self, memo):
+        not_there = []
+        existing = memo.get(self, not_there)
+        if existing is not not_there:
+            return existing
+
         meta = Meta()
         for name, value in self.__dict__.iteritems():
-            if name == 'source':
+            if name == 'source' or name == 'parent':
                 setattr(meta, name, value)
             else:
                 setattr(meta, name, copy.deepcopy(value, memo))
+        memo[self] = meta
+        return meta
 
 camelcase_cp = re.compile(r'[A-Z][^A-Z]+')
 
@@ -77,7 +85,6 @@ class BlueprintMeta(type):
         for name, value in attrs.iteritems():
             new_class.add_to_class(name, value)
 
-        new_class.parent = None
         return new_class
 
     def add_to_class(cls, name, value):
@@ -106,9 +113,9 @@ class Blueprint(taggables.TaggableClass):
             )
 
     def __init__(self, parent=None, seed=None, **kwargs):
-        if parent is not None:
-            self.parent = parent
         self.meta = copy.deepcopy(self.meta)
+        if parent is not None:
+            self.meta.parent = parent
         self.meta.mastered = True
         if seed is not None:
             self.meta.seed = seed

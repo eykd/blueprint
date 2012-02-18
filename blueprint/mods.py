@@ -23,20 +23,13 @@ class Mod(base.Blueprint):
 
     def __call__(self, source):
         if isinstance(source, type):
-            # If the source isn't mastered yet, subclass and mod it.
-            mod = base.BlueprintMeta(source.__name__ + self.__class__.__name__,
-                                     (source, ),
-                                     dict((n, self.__dict__.get(n, getattr(self.__class__, n)))
-                                          for n in self.meta.fields))
-            mod.meta.source = source
-
-            return mod
+            # If the source isn't mastered yet, do so now.
+            mod = source()
         else:
-            # If the source is mastered, copy and mod it.
             mod = copy.deepcopy(source)
-            mod.meta.source = source
+        mod.meta.source = source
 
-            for name in self.meta.fields:
-                setattr(mod, name, getattr(self, name))
+        for name in self.meta.fields:
+            setattr(mod, name, getattr(self, name))
 
-            return mod
+        return mod

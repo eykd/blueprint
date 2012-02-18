@@ -159,11 +159,11 @@ create a subclass of ``Mod``. Mods are just special blueprints::
 
 Then, apply it to another blueprint::
 
-    >>> ClubOfDoom = OfDoom(Club)
-    >>> club = ClubOfDoom()
+    >>> club = OfDoom(Club)
     >>> club.name
     'Big Club of DOOM'
 
+Mods always produce mastered blueprints.
 
 ====
 TODO
