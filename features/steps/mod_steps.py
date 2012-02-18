@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""blueprints_steps -- behavior steps for blueprint features.
+"""mod_steps -- behavior steps for Mod features.
 """
 from behave import given, when, then
 
@@ -13,10 +13,20 @@ def step(context):
 
     context.OfDoom = OfDoom
 
+    class MagicalItemPrefix(context.blueprint.Mod):
+        prefix = context.blueprint.PickOne(
+            'Gnarled',
+            'Inscribed',
+            'Magnificent',
+            )
+        name = context.blueprint.depends_on('prefix')(
+            context.blueprint.FormatTemplate('{parent.prefix} {meta.source.name}'))
+    context.MagicalItemPrefix = MagicalItemPrefix
+
 
 @then(u'I can mod a Club to create a modified Club of DOOM')
 def step(context):
-    context.ClubOfDoom = cod = context.OfDoom(context.Club)
-    club = cod()
+    club = context.OfDoom(context.Club)
+    assert isinstance(club, context.Club)
     assert club.name == 'Big Club of DOOM'
-    assert club.damage > 200, club.damage
+    assert club.damage >= 200, club.damage

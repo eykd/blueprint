@@ -39,11 +39,17 @@ An example::
         value = 1
         tags = 'foo bar'
 
+        class Meta:
+            abstract = True
+
 
     class Weapon(Item):
         name = 'Some Weapon'
         tags = 'dangerous equippable'
         damage = blueprint.RandomInt(1, 5)
+
+        class Meta:
+            abstract = True
 
 
     class Spear(Weapon):
@@ -159,10 +165,47 @@ create a subclass of ``Mod``. Mods are just special blueprints::
 
 Then, apply it to another blueprint::
 
-    >>> ClubOfDoom = OfDoom(Club)
-    >>> club = ClubOfDoom()
+    >>> club = OfDoom(Club)
     >>> club.name
     'Big Club of DOOM'
+
+Mods always produce mastered blueprints.
+
+
+=========
+Factories
+=========
+
+Factories put all the pieces together--they're rather a blueprint
+factory. Say that you want an item drop that selects from a few common
+Weapon blueprints and adds a couple magical Mods to make it
+cooler. Here's our second mod::
+
+    class MagicalItemPrefix(blueprint.Mod):
+        prefix = blueprint.PickOne(
+            'Gnarled',
+            'Inscribed',
+            'Magnificent',
+            )
+        name = blueprint.depends_on('prefix')(
+            blueprint.FormatTemplate('{parent.prefix} {meta.source.name}'))
+
+
+Now, here's our Magical Item factory::
+
+    class MagicalItemFactory(blueprint.Factory):
+        product = blueprint.PickFrom(
+            blueprint.WithTags('weapon'))
+        mods = [MagicalItemPrefix, OfDoom]
+
+
+Now, when we call the factory, we get a random Weapon with magical properties::
+
+    >>> weapon = MagicalItemFactory()
+    >>> weapon.name
+    'Gnarled Worn Spear of DOOM'
+
+Factories always produce mastered blueprints.
 
 
 ====
@@ -171,6 +214,7 @@ TODO
 
 - Better documentation. :\)
 - Factories (more metaclass magic!!! >:)
+- Support all operators on ``blueprint.Field``
 
 
 ====

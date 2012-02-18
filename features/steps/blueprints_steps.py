@@ -16,6 +16,9 @@ def step(context):
         value = 1
         tags = 'foo bar'
 
+        class Meta:
+            abstract = True
+
     context.Item = Item
 
 @then(u'my blueprint subclass will have a tag repository')
@@ -41,6 +44,8 @@ def step(context):
         tags = 'dangerous'
         damage = context.blueprint.RandomInt(1, 5)
 
+        class Meta:
+            abstract = True
     context.Weapon = Weapon
 
 
