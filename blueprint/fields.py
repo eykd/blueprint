@@ -186,7 +186,7 @@ class WithTags(Field):
         if self.not_tags:
             objects = objects.queryTagsDifference(*self.not_tags)
 
-        return list(objects)
+        return list(o for o in objects if not o.meta.abstract)
 
 
 def generator(func):

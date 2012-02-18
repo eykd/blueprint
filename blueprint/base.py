@@ -15,6 +15,7 @@ class Meta(object):
     def __init__(self):
         self.fields = set()
         self.mastered = False
+        self.abstract = False
         self.source = None
         self.parent = None
         

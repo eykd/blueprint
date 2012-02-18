@@ -39,11 +39,17 @@ An example::
         value = 1
         tags = 'foo bar'
 
+        class Meta:
+            abstract = True
+
 
     class Weapon(Item):
         name = 'Some Weapon'
         tags = 'dangerous equippable'
         damage = blueprint.RandomInt(1, 5)
+
+        class Meta:
+            abstract = True
 
 
     class Spear(Weapon):
