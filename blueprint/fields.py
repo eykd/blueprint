@@ -49,7 +49,7 @@ class _Operator(object):
         self.items = items
 
     def __repr__(self):
-        return '(%s)' % (self.__class__.__name__, str(self))
+        return '(%s)' % (str(self))
 
     def __str__(self):
         return (' %s ' % self.sym).join(repr(i) for i in self.items)
@@ -151,7 +151,8 @@ class FormatTemplate(Field):
         if parent is None:
             return self
         
-        fields = {'meta': parent.meta}
+        fields = {'meta': parent.meta,
+                  'parent': parent}
         for name in parent.meta.fields:
             if getattr(parent.__class__, name) is not self:
                 fields[name] = getattr(parent, name)
