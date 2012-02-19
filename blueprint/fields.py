@@ -10,6 +10,18 @@ __all__ = ['Field', 'RandomInt', 'PickOne', 'PickFrom', 'All',
 
 
 class Field(object):
+    """The base dynamic field class. Not very useful on its own.
+
+    Subclasses of ``Field`` should define a ``__call__`` method::
+
+        def __call__(self, parent):
+            ...
+
+    ``__call__`` should return the final, resolved value of the field.
+
+    When mastering a blueprint, any callable field on the blueprint
+    will be called with one argument, the parent blueprint itself.
+    """
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, str(self))
 
@@ -42,6 +54,8 @@ class Field(object):
 
 
 class _Operator(object):
+    """Base class for all operator fields.
+    """
     op = None
     sym = ''
     
@@ -65,26 +79,36 @@ class _Operator(object):
 
 
 class Add(_Operator):
+    """When resolved, adds all the provided arguments and returns the result.
+    """
     op = operator.add
     sym = '+'
 
 
 class Subtract(_Operator):
+    """When resolved, subtracts all the provided arguments and returns the result.
+    """
     op = operator.sub
     sym = '-'
 
 
 class Multiply(_Operator):
+    """When resolved, multiplies all the provided arguments and returns the result.
+    """
     op = operator.mul
     sym = '*'
 
 
 class Divide(_Operator):
+    """When resolved, divides all the provided arguments and returns the result.
+    """
     op = operator.div
     sym = '/'
 
 
 class RandomInt(Field):
+    """When resolved, returns a random integer between ``start`` and ``end``.
+    """
     def __init__(self, start, end):
         self.start = start
         self.end = end
@@ -97,6 +121,8 @@ class RandomInt(Field):
 
 
 class PickOne(Field):
+    """When resolved, returns a random item from the arguments provided.
+    """
     def __init__(self, *choices):
         self.choices = choices
 
@@ -111,6 +137,8 @@ class PickOne(Field):
 
 
 class PickFrom(Field):
+    """When resolved, returns a random item from the collection provided.
+    """
     def __init__(self, collection):
         self.collection = collection
 
@@ -128,6 +156,8 @@ class PickFrom(Field):
 
 
 class All(Field):
+    """When resolved, returns a list of the provided items, themselves resolved.
+    """
     def __init__(self, *items):
         self.items = items
 
@@ -139,6 +169,31 @@ class All(Field):
 
 
 class FormatTemplate(Field):
+    """When resolved, returns a rendered string from the provided template.
+
+    Uses the Python `format string syntax`_. All other fields are
+    available to the template, as well as the parent ``meta`` options
+    object. 
+
+    .. format string syntax: http://docs.python.org/library/string.html#formatstrings
+
+    An example::
+
+    >>> import blueprint as bp
+    >>> class Item(bp.Blueprint):
+    ...     bonus = 1
+    ...     name = bp.FormatTemplate('Item +{bonus}')
+    ...     joke = bp.FormatTemplate('Two men walked into a {meta.foo}')
+    ...
+    ...     class Meta:
+    ...         foo = 'bar'
+
+    >>> item = Item()
+    >>> item.name
+    "Item +1"
+    >>> item.joke
+    "Two men walked into a bar"
+    """
     defer_to_end = True
     
     def __init__(self, template):
@@ -160,6 +215,16 @@ class FormatTemplate(Field):
 
 
 class WithTags(Field):
+    """When resolved, returns the set of all blueprints selected by the given tags.
+
+    Takes multiple arguments. Arguments may be individual tags, or
+    space-separated strings with multiple tags. Tags begininng with
+    ``!`` denote a NOT (or difference), that is, \"all blueprints
+    *without* this tag\". Tags beginning with ``?`` denote an OR (or
+    union), that is, \"all blueprints with this tag, but not required
+    for others\". Tags without either prefix denote an AND (or
+    interesction), that is, \"all blueprints must have this tag\".
+    """
     def __init__(self, *tags):
         all_tags = set()
         for t in tags:
