@@ -154,7 +154,9 @@ class Taggable(object):
 
 
 class TaggableClass(object):
-    """A taggable object.
+    """A taggable class object.
+
+    Instances of such a class will not be tagged.
     """
     @classmethod
     def addTag(klass, *tags):

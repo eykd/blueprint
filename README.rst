@@ -12,8 +12,10 @@ on a `series of articles`_ by Sean Norman. `Overview here`_.
 - `Fields and Generators`_
 - `Tags`_
 - `Mods`_
+- `Factories`_
 - `TODO`_
 - `HELP`_
+
 
 ============
 Introduction
@@ -156,8 +158,7 @@ Mods
 
 Sometimes, you'll want to dynamically modify a blueprint. To do this,
 create a subclass of ``Mod``. Mods are just special blueprints::
-
-    
+   
     class OfDoom(blueprint.Mod):
         name = blueprint.FormatTemplate('{meta.source.name} of DOOM')
         value = lambda _: _.meta.source.value * 5

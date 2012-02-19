@@ -12,6 +12,27 @@ __all__ = ['Blueprint']
 
 
 class Meta(object):
+    """Meta options for Blueprints.
+
+    Default options include:
+
+    - ``fields``: a set of the field names present on the blueprint.
+
+    - ``mastered``: flag indicating whether the blueprint has been
+      mastered (i.e. instantiated).
+
+    - ``abstract``: flag indicating whether the blueprint is
+      abstract. Abstract blueprints don't show up in tag queries.
+
+    - ``source``: when a blueprint is modded, indicates the source blueprint.
+
+    - ``parent``: when a blueprint is nested inside another blueprint,
+      indicates the parent blueprint.
+
+    - ``random``: an instance of ``random.Random``, used for random number generation.
+
+    - ``seed``: the seed used to initialize the ``random.Random`` instance.
+    """
     def __init__(self):
         self.fields = set()
         self.mastered = False
@@ -42,6 +63,8 @@ camelcase_cp = re.compile(r'[A-Z][^A-Z]+')
 
 
 class BlueprintMeta(type):
+    """Metaclass for blueprints. Handles the declarative magic.
+    """
     def __init__(cls, name, bases, attrs):
         if not hasattr(cls, 'tag_repo'):
             # This branch only executes when processing the mount point itself.
@@ -96,6 +119,36 @@ class BlueprintMeta(type):
 
 
 class Blueprint(taggables.TaggableClass):
+    """A magical blueprint.
+
+    To create a blueprint, subclass Blueprint and add your
+    fields. Blueprints are automatically tagged by their class name
+    (CamelCase names are automatically split into components), and
+    inherit their ancestor blueprints' tags.
+
+    Example::
+
+        >>> import blueprint as bp
+        
+        >>> class Item(bp.Blueprint):
+        ...     # Tags are space-separated
+        ...     tags = 'foo bar'
+        ...     # Simple fields are static values
+        ...     name = 'generic item'
+        ...     value = 1
+        ...     # Dynamic field values use any callable object
+        ...     quality = bp.RandomInt(1, 6)
+        ...     price = bp.depends_on('value', 'quality')(lambda _: _.value * _.quality)
+
+        >>> Item.tags
+        set(['Item', 'foo', 'bar', 'item'])
+        >>> item = Item()  # Instantiate a "mastered" blueprint.
+        
+        >>> item.value
+        1
+        >>> 1 <= item.quality <= 6
+        True
+    """
     __metaclass__ = BlueprintMeta
 
     def __repr__(self):

@@ -8,7 +8,17 @@ __all__ = ['Factory']
 
 
 class Factory(base.Blueprint):
-    """A Blueprint Factory assembles mastered blueprints made to order.
+    """A Factory assembles mastered blueprints made to order.
+
+    A Factory subclass can define the following fields:
+
+    - ``product``: A Factory subclass *must* define a ``product``
+      field. The ``product`` field *must* resolve to a single
+      Blueprint.
+
+    - ``mods``: A list of mods to apply to the product field.
+
+    Calling a factory will return the product with mods applied.
     """
     product = None
     mods = []
