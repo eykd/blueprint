@@ -32,7 +32,10 @@ from the master.
 **Think of it as prototypal inheritance for Python!** (Yeah, I
 probably don't know what I'm talking about.)
 
-An example::
+Most of the big moving parts have their documentation, often with
+examples, in the docstring. Blueprint is best played with at the
+command line, trying out how things work. For the impatient, an
+example::
 
     import blueprint
 
