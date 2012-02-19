@@ -15,6 +15,7 @@ on a `series of articles`_ by Sean Norman. `Overview here`_.
 - `Factories`_
 - `TODO`_
 - `HELP`_
+- `Changelog`_
 
 
 ============
@@ -217,7 +218,6 @@ TODO
 ====
 
 - Better documentation. :\)
-- Factories (more metaclass magic!!! >:)
 - Support all operators on ``blueprint.Field``
 
 
@@ -230,3 +230,17 @@ on github <https://github.com/eykd/blueprint/issues>`_.
 
 On github, bleeding-edge development work is done on the ``develop``
 branch. ``master`` *should* always be stable.
+
+
+=========
+CHANGELOG
+=========
+
+- **0.3.1**: Radically improved docstrings, with relevant
+  examples. Added a changelog!
+
+- **0.3**: Added Factories. Bugfixes.
+
+- **0.2**: Added Mods. Bugfixes.
+
+- **0.1**: Initial release.
