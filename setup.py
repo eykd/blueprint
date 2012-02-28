@@ -33,7 +33,7 @@ setup(
     author_email=AUTHOR_EMAIL,
     url=URL,
     license=read_file('LICENSE'),
-    packages=[u'blueprint'],
+    packages=['blueprint'],
     include_package_data=True,
     zip_safe=False,
     classifiers=[
