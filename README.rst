@@ -236,6 +236,9 @@ branch. ``master`` *should* always be stable.
 CHANGELOG
 =========
 
+- **0.3.3**: Learned how to use distutils. :P (Fixed a unicode string
+  in ``setup([packages=[...]])``.)
+
 - **0.3.2**: Added the LICENSE file to the source distribution, so pip
   won't fail.
 
