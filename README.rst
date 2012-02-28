@@ -236,6 +236,9 @@ branch. ``master`` *should* always be stable.
 CHANGELOG
 =========
 
+- **0.3.2**: Added the LICENSE file to the source distribution, so pip
+  won't fail.
+
 - **0.3.1**: Radically improved docstrings, with relevant
   examples. Added a changelog!
 
