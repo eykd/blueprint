@@ -3,7 +3,7 @@ Blueprint
 =========
 
 Magical blueprints for procedural generation of content. Based roughly
-on a `series of articles`_ by Sean Norman. `Overview here`_.
+on a `series of articles`_ by Sean Howard. `Overview here`_.
 
 .. _series of articles: http://www.squidi.net/mapmaker/index.php
 .. _Overview here: http://www.squidi.net/mapmaker/musings/m100402.php
@@ -235,6 +235,9 @@ branch. ``master`` *should* always be stable.
 =========
 CHANGELOG
 =========
+
+- **0.3.4**: Learned how to read. Corrected Sean Howard's name in the
+  intro copy. Three micro-releases in 1 hour!
 
 - **0.3.3**: Learned how to use distutils. :P (Fixed a unicode string
   in ``setup([packages=[...]])``.)
