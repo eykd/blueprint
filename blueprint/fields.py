@@ -3,8 +3,11 @@
 """
 import random
 import operator
+import re
 
-__all__ = ['Field', 'RandomInt', 'PickOne', 'PickFrom', 'All',
+from . import dice
+
+__all__ = ['Field', 'RandomInt', 'Dice', 'PickOne', 'PickFrom', 'All',
            'FormatTemplate', 'WithTags',
            'generator', 'depends_on', 'resolve']
 
@@ -117,7 +120,42 @@ class RandomInt(Field):
         return '%s...%s' % (self.start, self.end)
 
     def __call__(self, parent):
-        return random.randint(self.start, self.end)
+        return parent.meta.random.randint(self.start, self.end)
+
+
+class Dice(Field):
+    """When resolved, returns a random roll of the dice defined in ``dice_expr``.
+
+    A dice expression is simply an extended-format python expression, where
+    a throw of the dice is represented as a string of the form
+    ``NdS``, where ``N`` is the number of dice, and ``S`` is the
+    number of sides on the dice. These dice expressions are expanded
+    to a call to ``field.roll(parent, num, sides)``, which returns a
+    list of integer results.
+
+    Within the expression, you have access to all python builtins, as
+    well as ``parent``, ``random`` (taken from
+    ``parent.meta.random``), and any keyword arguments passed in to
+    the constructor.
+
+    Example dice expressions::
+
+        '3d6'                 # -> a list of 3 integer results from a six-sided die
+        'sorted(3d6)          # -> a sorted list of 3 integer results
+        '3d6 + [10]'          # -> a list of 4 integers, the last one being 10.
+        'sum(3d6) + max(3d10) # -> an integer result from the given expression
+        'random.choice(3d6)'  # -> a random integer result chosen from 3 rolls.
+    """
+    def __init__(self, dice_expr, **local_kwargs):
+        self.expr = dice_expr
+        self.compiled_expr = dice.dcompile(dice_expr)
+        self.local_kwargs = local_kwargs
+
+    def __call__(self, parent):
+        return dice.roll(self.compiled_expr, random_obj=parent.meta.random, parent=parent, **self.local_kwargs)
+
+    def __str__(self):
+        return str(self.expr)
 
 
 class PickOne(Field):
@@ -130,7 +168,7 @@ class PickOne(Field):
         return str(self.choices)
 
     def __call__(self, parent):
-        result = random.choice(self.choices)
+        result = parent.meta.random.choice(self.choices)
         if callable(result):
             result = result(parent)
         return result
@@ -149,7 +187,7 @@ class PickFrom(Field):
         collection = self.collection
         if callable(collection):
             collection = collection(parent)
-        result = random.choice(list(collection))
+        result = parent.meta.random.choice(list(collection))
         if callable(result):
             result = result(parent)
         return result

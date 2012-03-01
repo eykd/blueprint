@@ -8,6 +8,7 @@ import fields
 import taggables
 import factories
 import mods
+import dice
 
 from base import *
 from fields import *
@@ -18,4 +19,4 @@ __all__ = list(base.__all__) \
           + fields.__all__ \
           + mods.__all__ \
           + factories.__all__ \
-          + ['base', 'fields', 'taggables', 'factories', 'mods']
+          + ['base', 'fields', 'taggables', 'factories', 'mods', 'dice']
