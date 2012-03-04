@@ -25,6 +25,11 @@ class Field(object):
     When mastering a blueprint, any callable field on the blueprint
     will be called with one argument, the parent blueprint itself.
     """
+    def reify(self, parent, item):
+        while callable(item):
+            item = item(parent)
+        return item
+
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, str(self))
 
@@ -169,9 +174,7 @@ class PickOne(Field):
 
     def __call__(self, parent):
         result = parent.meta.random.choice(self.choices)
-        if callable(result):
-            result = result(parent)
-        return result
+        return self.reify(parent, result)
 
 
 class PickFrom(Field):
@@ -203,7 +206,7 @@ class All(Field):
         return str(self.items)
 
     def __call__(self, parent):
-        return [i(parent) if callable(i) else i for i in self.items]
+        return [self.reify(parent, i) if callable(i) else i for i in self.items]
 
 
 class FormatTemplate(Field):
@@ -249,7 +252,7 @@ class FormatTemplate(Field):
         for name in parent.meta.fields:
             if getattr(parent.__class__, name) is not self:
                 fields[name] = getattr(parent, name)
-        return self.template.format(**fields)
+        return self.reify(parent, self.template).format(**fields)
 
 
 class WithTags(Field):
@@ -320,7 +323,6 @@ def depends_on(*names):
 def resolve(parent, field):
     """Resolve a field with the given parent instance.
     """
-    if callable(field):
-        return field(parent)
-    else:
-        return field
+    while callable(field):
+        field = field(parent)
+    return field
