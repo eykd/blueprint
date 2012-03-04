@@ -161,7 +161,6 @@ class Dice(Field):
 
     def __call__(self, parent):
         result = dice.roll(self.compiled_expr, random_obj=parent.meta.random, parent=parent, **self.local_kwargs)
-        # print "Rolled", result
         return result
 
     def __str__(self):
@@ -192,7 +191,6 @@ class DiceTable(Dice):
                 self.table[key] = value
 
     def __call__(self, parent):
-        # print self
         result = str(super(DiceTable, self).__call__(parent))
         result = self.table[result]
         return self.reify(parent, result)
