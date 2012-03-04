@@ -187,13 +187,8 @@ class PickFrom(Field):
         return str(self.collection)
 
     def __call__(self, parent):
-        collection = self.collection
-        if callable(collection):
-            collection = collection(parent)
-        result = parent.meta.random.choice(list(collection))
-        if callable(result):
-            result = result(parent)
-        return result
+        collection = self.reify(parent, self.collection)
+        return self.reify(parent, parent.meta.random.choice(list(collection)))
 
 
 class All(Field):
