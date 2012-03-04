@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 """blueprint.fields
 """
+from collections import defaultdict
 import random
 import operator
 import re
+import pprint
 
 from . import dice
 
-__all__ = ['Field', 'RandomInt', 'Dice', 'PickOne', 'PickFrom', 'All',
+__all__ = ['Field', 'RandomInt', 'Dice', 'DiceTable',
+           'PickOne', 'PickFrom', 'All',
            'FormatTemplate', 'WithTags',
            'generator', 'depends_on', 'resolve']
 
@@ -131,12 +134,12 @@ class RandomInt(Field):
 class Dice(Field):
     """When resolved, returns a random roll of the dice defined in ``dice_expr``.
 
-    A dice expression is simply an extended-format python expression, where
-    a throw of the dice is represented as a string of the form
+    A dice expression is simply an extended-format python expression,
+    where a throw of the dice is represented as a string of the form
     ``NdS``, where ``N`` is the number of dice, and ``S`` is the
     number of sides on the dice. These dice expressions are expanded
-    to a call to ``field.roll(parent, num, sides)``, which returns a
-    list of integer results.
+    to a call to ``[random.randint(1, sides) for x in xrange(num)]``,
+    which evaluates to a list of integer results.
 
     Within the expression, you have access to all python builtins, as
     well as ``parent``, ``random`` (taken from
@@ -157,10 +160,45 @@ class Dice(Field):
         self.local_kwargs = local_kwargs
 
     def __call__(self, parent):
-        return dice.roll(self.compiled_expr, random_obj=parent.meta.random, parent=parent, **self.local_kwargs)
+        result = dice.roll(self.compiled_expr, random_obj=parent.meta.random, parent=parent, **self.local_kwargs)
+        # print "Rolled", result
+        return result
 
     def __str__(self):
         return str(self.expr)
+
+
+class DiceTable(Dice):
+    """
+    Same as a Dice field, but the result of evaluating the dice
+    expression is used to select a value from a table.
+    """
+    range_sep_cp = re.compile('[-.:]+')
+    
+    def __init__(self, dice_expr, table, default=None, **local_kwargs):
+        super(DiceTable, self).__init__(dice_expr, **local_kwargs)
+        self.table = defaultdict(lambda: default)
+        for key, value in table.iteritems():
+            if isinstance(key, basestring):
+                if self.range_sep_cp.search(key):
+                    start_end = self.range_sep_cp.split(key)
+                    start, end = int(start_end[0]), int(start_end[-1])
+                    for n in xrange(start, end+1):
+                        self.table[str(n)] = value
+                else:
+                    for i in key.split(','):
+                        self.table[i.strip()] = value
+            else:
+                self.table[key] = value
+
+    def __call__(self, parent):
+        # print self
+        result = str(super(DiceTable, self).__call__(parent))
+        result = self.table[result]
+        return self.reify(parent, result)
+
+    def __str__(self):
+        return '%s for %s' % (str(self.expr), pprint.pformat(self.table))
 
 
 class PickOne(Field):
