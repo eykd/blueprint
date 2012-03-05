@@ -2,7 +2,6 @@
 """blueprint.fields
 """
 from collections import defaultdict
-import random
 import operator
 import re
 import pprint
@@ -28,11 +27,6 @@ class Field(object):
     When mastering a blueprint, any callable field on the blueprint
     will be called with one argument, the parent blueprint itself.
     """
-    def reify(self, parent, item):
-        while callable(item):
-            item = item(parent)
-        return item
-
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, str(self))
 
@@ -193,7 +187,7 @@ class DiceTable(Dice):
     def __call__(self, parent):
         result = str(super(DiceTable, self).__call__(parent))
         result = self.table[result]
-        return self.reify(parent, result)
+        return resolve(parent, result)
 
     def __str__(self):
         return '%s for %s' % (str(self.expr), pprint.pformat(self.table))
@@ -210,7 +204,7 @@ class PickOne(Field):
 
     def __call__(self, parent):
         result = parent.meta.random.choice(self.choices)
-        return self.reify(parent, result)
+        return resolve(parent, result)
 
 
 class PickFrom(Field):
@@ -223,8 +217,8 @@ class PickFrom(Field):
         return str(self.collection)
 
     def __call__(self, parent):
-        collection = self.reify(parent, self.collection)
-        return self.reify(parent, parent.meta.random.choice(list(collection)))
+        collection = resolve(parent, self.collection)
+        return resolve(parent, parent.meta.random.choice(list(collection)))
 
 
 class All(Field):
@@ -237,7 +231,7 @@ class All(Field):
         return str(self.items)
 
     def __call__(self, parent):
-        return [self.reify(parent, i) if callable(i) else i for i in self.items]
+        return [resolve(parent, i) if callable(i) else i for i in self.items]
 
 
 class FormatTemplate(Field):
@@ -283,7 +277,7 @@ class FormatTemplate(Field):
         for name in parent.meta.fields:
             if getattr(parent.__class__, name) is not self:
                 fields[name] = getattr(parent, name)
-        return self.reify(parent, self.template).format(**fields)
+        return resolve(parent, self.template).format(**fields)
 
 
 class WithTags(Field):

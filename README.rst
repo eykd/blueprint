@@ -236,9 +236,13 @@ branch. ``master`` *should* always be stable.
 CHANGELOG
 =========
 
-- **dev**: Added a dice roller through ``blueprint.dice.roll``, and a
-  corresponding ``Dice`` field. Blueprint subclasses now have a better
-  ``__repr__`` through the metaclass. METACLASSES ROCK.
+- **0.4**: Added a dice roller through ``blueprint.dice.roll``, and a
+  corresponding ``Dice`` and ``DiceTable`` fields. Blueprint
+  subclasses now have a better ``__repr__`` through the
+  metaclass. **METACLASSES ROCK.**
+
+  Modified the behavior of field resolution. All fields now use
+  ``fields.resolve`` to consistently handle nested callables.
 
 - **0.3.4**: Learned how to read. Corrected Sean Howard's name in the
   intro copy. Three micro-releases in 1 hour!
