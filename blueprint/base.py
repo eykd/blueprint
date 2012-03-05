@@ -117,6 +117,21 @@ class BlueprintMeta(type):
         else:
             setattr(cls, name, value)
 
+    def __repr__(cls):
+        return '<%s:\n    %s\n    >' % (
+            cls.__name__,
+            '\n    '.join(
+                '%s -- %s' % (
+                    n,
+                    '\n'.join(
+                        '    %s' % i
+                        for i in repr(getattr(cls, n)).splitlines()
+                        ).strip()
+                    )
+                for n in sorted(cls.meta.fields)
+                )
+            )
+
 
 class Blueprint(taggables.TaggableClass):
     """A magical blueprint.

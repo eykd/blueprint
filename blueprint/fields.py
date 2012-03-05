@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 """blueprint.fields
 """
-import random
+from collections import defaultdict
 import operator
+import re
+import pprint
 
-__all__ = ['Field', 'RandomInt', 'PickOne', 'PickFrom', 'All',
+from . import dice
+
+__all__ = ['Field', 'RandomInt', 'Dice', 'DiceTable',
+           'PickOne', 'PickFrom', 'All',
            'FormatTemplate', 'WithTags',
            'generator', 'depends_on', 'resolve']
 
@@ -117,7 +122,75 @@ class RandomInt(Field):
         return '%s...%s' % (self.start, self.end)
 
     def __call__(self, parent):
-        return random.randint(self.start, self.end)
+        return parent.meta.random.randint(self.start, self.end)
+
+
+class Dice(Field):
+    """When resolved, returns a random roll of the dice defined in ``dice_expr``.
+
+    A dice expression is simply an extended-format python expression,
+    where a throw of the dice is represented as a string of the form
+    ``NdS``, where ``N`` is the number of dice, and ``S`` is the
+    number of sides on the dice. These dice expressions are expanded
+    to a call to ``[random.randint(1, sides) for x in xrange(num)]``,
+    which evaluates to a list of integer results.
+
+    Within the expression, you have access to all python builtins, as
+    well as ``parent``, ``random`` (taken from
+    ``parent.meta.random``), and any keyword arguments passed in to
+    the constructor.
+
+    Example dice expressions::
+
+        '3d6'                 # -> a list of 3 integer results from a six-sided die
+        'sorted(3d6)          # -> a sorted list of 3 integer results
+        '3d6 + [10]'          # -> a list of 4 integers, the last one being 10.
+        'sum(3d6) + max(3d10) # -> an integer result from the given expression
+        'random.choice(3d6)'  # -> a random integer result chosen from 3 rolls.
+    """
+    def __init__(self, dice_expr, **local_kwargs):
+        self.expr = dice_expr
+        self.compiled_expr = dice.dcompile(dice_expr)
+        self.local_kwargs = local_kwargs
+
+    def __call__(self, parent):
+        result = dice.roll(self.compiled_expr, random_obj=parent.meta.random, parent=parent, **self.local_kwargs)
+        return result
+
+    def __str__(self):
+        return str(self.expr)
+
+
+class DiceTable(Dice):
+    """
+    Same as a Dice field, but the result of evaluating the dice
+    expression is used to select a value from a table.
+    """
+    range_sep_cp = re.compile('[-.:]+')
+    
+    def __init__(self, dice_expr, table, default=None, **local_kwargs):
+        super(DiceTable, self).__init__(dice_expr, **local_kwargs)
+        self.table = defaultdict(lambda: default)
+        for key, value in table.iteritems():
+            if isinstance(key, basestring):
+                if self.range_sep_cp.search(key):
+                    start_end = self.range_sep_cp.split(key)
+                    start, end = int(start_end[0]), int(start_end[-1])
+                    for n in xrange(start, end+1):
+                        self.table[str(n)] = value
+                else:
+                    for i in key.split(','):
+                        self.table[i.strip()] = value
+            else:
+                self.table[key] = value
+
+    def __call__(self, parent):
+        result = str(super(DiceTable, self).__call__(parent))
+        result = self.table[result]
+        return resolve(parent, result)
+
+    def __str__(self):
+        return '%s for %s' % (str(self.expr), pprint.pformat(self.table))
 
 
 class PickOne(Field):
@@ -130,10 +203,8 @@ class PickOne(Field):
         return str(self.choices)
 
     def __call__(self, parent):
-        result = random.choice(self.choices)
-        if callable(result):
-            result = result(parent)
-        return result
+        result = parent.meta.random.choice(self.choices)
+        return resolve(parent, result)
 
 
 class PickFrom(Field):
@@ -146,13 +217,8 @@ class PickFrom(Field):
         return str(self.collection)
 
     def __call__(self, parent):
-        collection = self.collection
-        if callable(collection):
-            collection = collection(parent)
-        result = random.choice(list(collection))
-        if callable(result):
-            result = result(parent)
-        return result
+        collection = resolve(parent, self.collection)
+        return resolve(parent, parent.meta.random.choice(list(collection)))
 
 
 class All(Field):
@@ -165,7 +231,7 @@ class All(Field):
         return str(self.items)
 
     def __call__(self, parent):
-        return [i(parent) if callable(i) else i for i in self.items]
+        return [resolve(parent, i) if callable(i) else i for i in self.items]
 
 
 class FormatTemplate(Field):
@@ -211,7 +277,7 @@ class FormatTemplate(Field):
         for name in parent.meta.fields:
             if getattr(parent.__class__, name) is not self:
                 fields[name] = getattr(parent, name)
-        return self.template.format(**fields)
+        return resolve(parent, self.template).format(**fields)
 
 
 class WithTags(Field):
@@ -282,7 +348,6 @@ def depends_on(*names):
 def resolve(parent, field):
     """Resolve a field with the given parent instance.
     """
-    if callable(field):
-        return field(parent)
-    else:
-        return field
+    while callable(field):
+        field = field(parent)
+    return field
