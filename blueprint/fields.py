@@ -5,13 +5,14 @@ from collections import defaultdict
 import operator
 import re
 import pprint
+import inspect
 
 from . import dice
 
 __all__ = ['Field', 'RandomInt', 'Dice', 'DiceTable',
            'PickOne', 'PickFrom', 'All',
-           'FormatTemplate', 'WithTags',
-           'generator', 'depends_on', 'resolve']
+           'FormatTemplate', 'Property', 'WithTags',
+           'generator', 'depends_on', 'defer_to_end', 'resolve']
 
 
 class Field(object):
@@ -58,7 +59,7 @@ class Field(object):
         return Divide(a, self)
 
 
-class _Operator(object):
+class _Operator(Field):
     """Base class for all operator fields.
     """
     op = None
@@ -77,10 +78,16 @@ class _Operator(object):
         result = None
         for item in self.items:
             if result is None:
-                result = resolve(parent, item)
+                result = self.resolve(parent, item)
             else:
-                result = self.op(result, resolve(parent, item))
+                result = self.op(result, self.resolve(parent, item))
         return result
+
+    def resolve(self, parent, item):
+        if isinstance(item, _Operator):
+            return item(parent)
+        else:
+            return resolve(parent, item)
 
 
 class Add(_Operator):
@@ -166,7 +173,7 @@ class DiceTable(Dice):
     Same as a Dice field, but the result of evaluating the dice
     expression is used to select a value from a table.
     """
-    range_sep_cp = re.compile('[-.:]+')
+    range_sep_cp = re.compile(r'(?:\.\.)|[:]')
     
     def __init__(self, dice_expr, table, default=None, **local_kwargs):
         super(DiceTable, self).__init__(dice_expr, **local_kwargs)
@@ -260,7 +267,7 @@ class FormatTemplate(Field):
     >>> item.joke
     "Two men walked into a bar"
     """
-    defer_to_end = True
+    _defer_to_end = True
     
     def __init__(self, template):
         self.template = template
@@ -278,6 +285,17 @@ class FormatTemplate(Field):
             if getattr(parent.__class__, name) is not self:
                 fields[name] = getattr(parent, name)
         return resolve(parent, self.template).format(**fields)
+
+
+class Property(Field):
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, parent, type=None):
+        if parent is None:
+            return self
+
+        return self.func(parent)
 
 
 class WithTags(Field):
@@ -349,5 +367,15 @@ def resolve(parent, field):
     """Resolve a field with the given parent instance.
     """
     while callable(field):
-        field = field(parent)
+        if inspect.ismethod(field):
+            field = field()
+        else:
+            field = field(parent)
+    if field.__class__.__name__ == 'generator':
+        field = list(resolve(parent, i) for i in field)
+    return field
+
+
+def defer_to_end(field):
+    field._defer_to_end = True
     return field

@@ -7,6 +7,7 @@ import copy
 from collections import deque
 import random
 from . import taggables
+from . import fields
 
 __all__ = ['Blueprint']
 
@@ -199,24 +200,30 @@ class Blueprint(taggables.TaggableClass):
         resolved = set()
         deferred = deque()
         deferred_to_end = deque()
+        deferred_to_end_names = set()
 
         def resolve(name, field):
+            # print "Can we resolve", name
             if callable(field):
                 if hasattr(field, 'depends_on') and not field.depends_on.issubset(resolved):
-                    deferred.appendleft((name, field))
-                else:
-                    if inspect.ismethod(field):
-                        setattr(self, name, field())
+                    if field.depends_on.intersection(deferred_to_end_names):
+                        # print "Deferring", name, "to end."
+                        deferred_to_end.append(name)
                     else:
-                        setattr(self, name, field(self))
+                        # print "Deferring", name
+                        deferred.appendleft((name, field))
+                else:
+                    # print "Resolving", name
+                    setattr(self, name, fields.resolve(self, field))
                     resolved.add(name)
             else:
                 resolved.add(name)
             
         for name in self.meta.fields:
             class_field = getattr(self.__class__, name)
-            if hasattr(class_field, 'defer_to_end'):
+            if hasattr(class_field, '_defer_to_end'):
                 deferred_to_end.appendleft(name)
+                deferred_to_end_names.add(name)
             else:
                 field = getattr(self, name)
                 resolve(name, field)
@@ -225,6 +232,7 @@ class Blueprint(taggables.TaggableClass):
             name, field = deferred.pop()
             resolve(name, field)
 
+        deferred_to_end_names.clear()
         while deferred_to_end:
             name = deferred_to_end.pop()
             field = getattr(self, name)
