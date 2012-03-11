@@ -27,11 +27,13 @@ def roll(dice_expr, random_obj=None, **kwargs):
     code object as returned by ``dcompile``.
     """
     if random_obj is None:
+        import random
         random_obj = random
     if isinstance(dice_expr, basestring):
         dice_expr = dcompile(dice_expr)
 
-    return eval(dice_expr, globals(), dict(
-        random = random_obj,
-        **kwargs
-        ))
+    local_vars = dict(**kwargs)
+    local_vars['random'] = random_obj
+    local_vars['results'] = results
+
+    return eval(dice_expr, local_vars)
