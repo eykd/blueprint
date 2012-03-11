@@ -58,7 +58,7 @@ class Field(object):
         return Divide(a, self)
 
 
-class _Operator(object):
+class _Operator(Field):
     """Base class for all operator fields.
     """
     op = None
