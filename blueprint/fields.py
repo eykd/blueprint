@@ -166,7 +166,7 @@ class DiceTable(Dice):
     Same as a Dice field, but the result of evaluating the dice
     expression is used to select a value from a table.
     """
-    range_sep_cp = re.compile('[-.:]+')
+    range_sep_cp = re.compile(r'(?:\.\.)|[:]')
     
     def __init__(self, dice_expr, table, default=None, **local_kwargs):
         super(DiceTable, self).__init__(dice_expr, **local_kwargs)
