@@ -236,6 +236,28 @@ branch. ``master`` *should* always be stable.
 CHANGELOG
 =========
 
+- **0.5**: A couple new features, some interfaces and many bug-fixes:
+
+  - **Feature:** Added Property descriptor which acts like a field. May not actually be useful.
+
+  - **Feature:** Dice rolls now return a results list, which auto-sums
+    when doing integer or floating point arithmetic. No more mandatory
+    ``sum()`` in your dice expressions.
+
+  - **Major bug fix:** Fixed bug where Dice fields did not use the
+    correct random object, with nondeterministic results.
+
+  - **Bug fix/Interface change:** Improved (though not yet perfect)
+    field resolution mechanics. Fields that depend on other, deferred
+    fields now have a fighting chance at resolving.
+
+  - **Bug fix/Interface change:** DiceTable no longer accepts `-` or
+    arbitrary numbers of `.` or `:` as a range separator. Only `..` or
+    `:` work now.
+
+  - **Interface change:** Operators are now Fields in their own right,
+    with all resulting rights and privileges.
+
 - **0.4**: Added a dice roller through ``blueprint.dice.roll``, and a
   corresponding ``Dice`` and ``DiceTable`` fields. Blueprint
   subclasses now have a better ``__repr__`` through the
