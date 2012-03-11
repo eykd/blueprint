@@ -280,6 +280,17 @@ class FormatTemplate(Field):
         return resolve(parent, self.template).format(**fields)
 
 
+class Property(Field):
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, parent, type=None):
+        if parent is None:
+            return self
+
+        return self.func(parent)
+
+
 class WithTags(Field):
     """When resolved, returns the set of all blueprints selected by the given tags.
 
