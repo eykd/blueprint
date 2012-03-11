@@ -5,13 +5,14 @@ from collections import defaultdict
 import operator
 import re
 import pprint
+import inspect
 
 from . import dice
 
 __all__ = ['Field', 'RandomInt', 'Dice', 'DiceTable',
            'PickOne', 'PickFrom', 'All',
-           'FormatTemplate', 'WithTags',
-           'generator', 'depends_on', 'resolve']
+           'FormatTemplate', 'Property', 'WithTags',
+           'generator', 'depends_on', 'defer_to_end', 'resolve']
 
 
 class Field(object):
@@ -77,10 +78,16 @@ class _Operator(Field):
         result = None
         for item in self.items:
             if result is None:
-                result = resolve(parent, item)
+                result = self.resolve(parent, item)
             else:
-                result = self.op(result, resolve(parent, item))
+                result = self.op(result, self.resolve(parent, item))
         return result
+
+    def resolve(self, parent, item):
+        if isinstance(item, _Operator):
+            return item(parent)
+        else:
+            return resolve(parent, item)
 
 
 class Add(_Operator):
@@ -260,7 +267,7 @@ class FormatTemplate(Field):
     >>> item.joke
     "Two men walked into a bar"
     """
-    defer_to_end = True
+    _defer_to_end = True
     
     def __init__(self, template):
         self.template = template
@@ -360,5 +367,15 @@ def resolve(parent, field):
     """Resolve a field with the given parent instance.
     """
     while callable(field):
-        field = field(parent)
+        if inspect.ismethod(field):
+            field = field()
+        else:
+            field = field(parent)
+    if field.__class__.__name__ == 'generator':
+        field = list(resolve(parent, i) for i in field)
+    return field
+
+
+def defer_to_end(field):
+    field._defer_to_end = True
     return field
