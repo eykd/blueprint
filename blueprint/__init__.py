@@ -14,6 +14,7 @@ from base import *
 from fields import *
 from mods import *
 from factories import *
+from markov import *
 
 __all__ = list(base.__all__) \
           + fields.__all__ \
