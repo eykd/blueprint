@@ -12,6 +12,9 @@ class results(list):
     def __int__(self):
         return int(sum(self))
 
+    def __hash__(self):
+        return hash(int(self))
+
     def __float__(self):
         return float(sum(self))
     
