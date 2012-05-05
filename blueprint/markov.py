@@ -21,6 +21,7 @@ class MarkovChain(fields.Field, collections.Mapping):
             raise ValueError("Chain length must be between 1 and 10, inclusive")
         self._dict = collections.defaultdict(list)
         self.chainlen = chainlen
+        self.max_length = max_length
         self.readData(source_list)
 
     def next(self):
@@ -38,8 +39,8 @@ class MarkovChain(fields.Field, collections.Mapping):
             spacer = u''.join((u" " * chainlen, name))
             name_len = len(name)
             for num in xrange(name_len):
-                self.markov.add_key(spacer[num:num+chainlen], spacer[num+chainlen])
-            self.markov.add_key(spacer[name_len:name_len+chainlen], "\n")
+                self.add_key(spacer[num:num+chainlen], spacer[num+chainlen])
+            self.add_key(spacer[name_len:name_len+chainlen], "\n")
 
     def getRandomName(self, parent):
         """Return a random name.
