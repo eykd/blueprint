@@ -241,3 +241,7 @@ class Blueprint(taggables.TaggableClass):
             name = deferred_to_end.pop()
             field = getattr(self, name)
             resolve(name, field)
+
+    @fields.generator
+    def as_dict(self):
+        return dict((n, getattr(self, n)) for n in self.meta.fields)
