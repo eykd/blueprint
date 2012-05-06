@@ -55,6 +55,8 @@ class Meta(object):
         for name, value in self.__dict__.iteritems():
             if name == 'source' or name == 'parent':
                 setattr(meta, name, value)
+            elif name == 'random':
+                meta.random = random.Random()
             else:
                 setattr(meta, name, copy.deepcopy(value, memo))
         memo[self] = meta
@@ -189,6 +191,8 @@ class Blueprint(taggables.TaggableClass):
         self.meta.mastered = True
         if seed is not None:
             self.meta.seed = seed
+        elif parent is not None:
+            self.meta.seed = parent.meta.seed
         else:
             self.meta.seed = random.random()
         self.meta.random.seed(self.meta.seed)
@@ -237,3 +241,7 @@ class Blueprint(taggables.TaggableClass):
             name = deferred_to_end.pop()
             field = getattr(self, name)
             resolve(name, field)
+
+    @fields.generator
+    def as_dict(self):
+        return dict((n, getattr(self, n)) for n in self.meta.fields)
