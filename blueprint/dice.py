@@ -12,6 +12,12 @@ class results(list):
     def __int__(self):
         return int(sum(self))
 
+    def __str__(self):
+        return str(int(self))
+
+    def __unicode__(self):
+        return unicode(int(self))
+
     def __hash__(self):
         return hash(int(self))
 
@@ -44,6 +50,12 @@ class results(list):
 
     def __rdiv__(self, a):
         return a / self._convert(a)
+
+    def __eq__(self, b):
+        return b == self._convert(b)
+
+    def __ne__(self, b):
+        return b != self._convert(b)
 
 
 def dcompile(dice_expr):
