@@ -6,6 +6,25 @@ import re
 __all__ = ['roll', 'dcompile']
 
 dice_cp = re.compile(r'(?P<num>\d+)d(?P<sides>\d+)')
+fudge_cp = re.compile(r'(?P<num>\d+)d[fF]')
+
+safe_cp = re.compile(r"""
+^(?:
+    \d+d\d+  # Dice expression
+  | \d+d[Ff] # Fudge dice
+  | \d+
+  | sum\(
+  | sorted\(
+  | max\(
+  | min\(
+  | abs\(
+  | random\.choice\(
+  | \(
+  | \)
+  | [+-/*%]
+  | \s
+)+$
+""", re.VERBOSE)
 
 
 class results(list):
@@ -65,7 +84,11 @@ def dcompile(dice_expr):
     code (list comprehensions), and compiles the rest for a future
     ``eval``.
     """
-    expr = dice_cp.sub('results(random.randint(1, \g<sides>) for x in xrange(\g<num>))', dice_expr)
+    assert safe_cp.match(dice_expr), 'Invalid dice expression: %s' % dice_expr
+    expr = dice_cp.sub('results(random.randint(1, \g<sides>) for x in xrange(\g<num>))',
+                       dice_expr)
+    expr = fudge_cp.sub('results(random.choice([-1, -1, 0, 0, 1, 1]) for x in xrange(\g<num>))',
+                        dice_expr)
     return compile(expr, 'dice_expression: (%s)' % dice_expr, 'eval')
 
 
