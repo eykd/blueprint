@@ -114,7 +114,10 @@ class Multiply(_Operator):
 class Divide(_Operator):
     """When resolved, divides all the provided arguments and returns the result.
     """
-    op = operator.div
+    try:
+        op = operator.div
+    except AttributeError:  # Python 3 (note that this returns a float unless: operands are integral and there is no remainder.)
+        op = operator.truediv
     sym = '/'
 
 

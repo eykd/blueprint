@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 """blueprint.base -- base metaclasses and other junk for blueprints.
 """
+from __future__ import absolute_import
 import re
 import inspect
 import copy
 from collections import deque
 import random
+from six import with_metaclass
+
 from . import taggables
 from . import fields
 
@@ -52,7 +55,7 @@ class Meta(object):
             return existing
 
         meta = Meta()
-        for name, value in self.__dict__.iteritems():
+        for name, value in self.__dict__.items():
             if name == 'source' or name == 'parent':
                 setattr(meta, name, value)
             elif name == 'random':
@@ -100,7 +103,7 @@ class BlueprintMeta(type):
         meta = new_class.meta = Meta()
         if 'Meta' in attrs:
             usermeta = attrs.pop('Meta')
-            for key, value in usermeta.__dict__.iteritems():
+            for key, value in usermeta.__dict__.items():
                 if not key.startswith('_'):
                     setattr(meta, key, value)
         meta.fields.update(a for a in attrs.keys() if not a.startswith('_') and not hasattr(attrs[a], 'is_generator'))
@@ -109,7 +112,7 @@ class BlueprintMeta(type):
                 meta.fields.update(base.meta.fields)
 
         # Transfer the rest of the attributes.
-        for name, value in attrs.iteritems():
+        for name, value in attrs.items():
             new_class.add_to_class(name, value)
 
         return new_class
@@ -136,7 +139,7 @@ class BlueprintMeta(type):
             )
 
 
-class Blueprint(taggables.TaggableClass):
+class Blueprint(with_metaclass(BlueprintMeta, taggables.TaggableClass)):
     """A magical blueprint.
 
     To create a blueprint, subclass Blueprint and add your
@@ -197,7 +200,7 @@ class Blueprint(taggables.TaggableClass):
             self.meta.seed = random.random()
         self.meta.random.seed(self.meta.seed)
         self.meta.kwargs = kwargs
-        for name, value in kwargs.iteritems():
+        for name, value in kwargs.items():
             setattr(self, name, value)
 
         # Resolve any unresolved fields.

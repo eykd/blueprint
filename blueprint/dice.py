@@ -5,6 +5,12 @@ import re
 
 __all__ = ['roll', 'dcompile']
 
+try:
+    _ = xrange
+    del _
+except NameError:
+    xrange = range  # Python 3
+
 dice_cp = re.compile(r'(?P<num>\d+)d(?P<sides>\d+)')
 fudge_cp = re.compile(r'(?P<num>\d+)d[fF]')
 

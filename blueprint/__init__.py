@@ -3,19 +3,19 @@
 
 Based roughly on http://www.squidi.net/mapmaker/musings/m100402.php
 """
-import base
-import fields
-import taggables
-import factories
-import mods
-import dice
-
-from base import *
-from fields import *
-from mods import *
-from factories import *
-from markov import *
-from collection import *
+import blueprint.base as base
+import blueprint.fields as fields
+import blueprint.taggables as mods
+import blueprint.factories as factories
+import blueprint.mods as mods
+import blueprint.dice as dice
+import blueprint.collection as collection
+from blueprint.base import *
+from blueprint.fields import *
+from blueprint.mods import *
+from blueprint.factories import *
+from blueprint.markov import *
+from blueprint.collection import *
 
 __all__ = list(base.__all__) \
           + fields.__all__ \
