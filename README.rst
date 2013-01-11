@@ -231,9 +231,12 @@ on github <https://github.com/eykd/blueprint/issues>`_.
 On github, bleeding-edge development work is done on the ``develop``
 branch. ``master`` *should* always be stable.
 
-Tests are written using the [behave](http://packages.python.org/behave/) 
-BDD framework, and may be found in the `features/` folder. To run the test
-suite, invoke `behave` from the project root.
+Tests are written using the `behave`_ BDD framework, and may be found 
+in the ``features/`` folder. To run the test suite, invoke ``behave`` 
+from the project root.
+
+.. _behave: http://packages.python.org/behave/
+
 
 =========
 CHANGELOG
