@@ -96,8 +96,8 @@ class AbstractTagSet(object):
                     if tag not in with_tags:
                         rank -= 1
             rankings.append(rank)
-        # Python 3 zip is an iterator, ergo no itertools.izip available.
-        ranks_objs = sorted(getattr(itertools, 'izip', zip)(rankings, objects), reverse=True)
+        # Python 3 zip is an iterator, ergo no itertools.izip available.)
+        ranks_objs = sorted(getattr(itertools, 'izip', zip)(rankings, objects), reverse=True, key=lambda v:v[0])
         toprank = ranks_objs[0][0]
         how_many = rankings.count(toprank)
         top_contenders = [robj[1] for robj in ranks_objs[:how_many]]
@@ -106,7 +106,7 @@ class AbstractTagSet(object):
             winner = top_contenders[0]
         else:
             by_access = [(getattr(cntndr, 'last_picked', 0), cntndr) for cntndr in top_contenders]
-            by_access.sort()
+            by_access.sort(key = lambda v:v[0])
             winner = by_access[0][1]
 
         winner.last_picked = time.time()

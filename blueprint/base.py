@@ -170,7 +170,6 @@ class Blueprint(with_metaclass(BlueprintMeta, taggables.TaggableClass)):
         >>> 1 <= item.quality <= 6
         True
     """
-    __metaclass__ = BlueprintMeta
 
     def __repr__(self):
         return '<%s:\n    %s\n    >' % (

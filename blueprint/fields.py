@@ -9,7 +9,11 @@ import inspect
 
 from . import dice
 
-xrange = dice.xrange
+try:
+    _ = xrange
+    del _
+except NameError:
+    xrange = range  # Python 3
 
 __all__ = ['Field', 'RandomInt', 'Dice', 'DiceTable',
            'PickOne', 'PickFrom', 'All',
