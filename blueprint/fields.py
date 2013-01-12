@@ -9,6 +9,12 @@ import inspect
 
 from . import dice
 
+try:
+    _ = xrange
+    del _
+except NameError:
+    xrange = range  # Python 3
+
 __all__ = ['Field', 'RandomInt', 'Dice', 'DiceTable',
            'PickOne', 'PickFrom', 'All',
            'FormatTemplate', 'Property', 'WithTags',
@@ -114,7 +120,10 @@ class Multiply(_Operator):
 class Divide(_Operator):
     """When resolved, divides all the provided arguments and returns the result.
     """
-    op = operator.div
+    try:
+        op = operator.div
+    except AttributeError:  # Python 3 (note that this returns a float unless: operands are integral and there is no remainder.)
+        op = operator.truediv
     sym = '/'
 
 

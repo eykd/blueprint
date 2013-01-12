@@ -118,7 +118,7 @@ def step(context):
     assert context.Club in q
 
     old_weapon = None
-    for x in xrange(10):
+    for x in range(10):
         weapon = repo.select(with_tags=('Weapon', 'primitive'))
         assert weapon in (context.Spear, context.PointedStick, context.Club)
         assert weapon is not old_weapon
