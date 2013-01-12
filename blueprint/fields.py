@@ -9,6 +9,8 @@ import inspect
 
 from . import dice
 
+xrange = dice.xrange
+
 __all__ = ['Field', 'RandomInt', 'Dice', 'DiceTable',
            'PickOne', 'PickFrom', 'All',
            'FormatTemplate', 'Property', 'WithTags',

@@ -96,7 +96,8 @@ class AbstractTagSet(object):
                     if tag not in with_tags:
                         rank -= 1
             rankings.append(rank)
-        ranks_objs = sorted(itertools.izip(rankings, objects), reverse=True)
+        # Python 3 zip is an iterator, ergo no itertools.izip available.
+        ranks_objs = sorted(getattr(itertools, 'izip', zip)(rankings, objects), reverse=True)
         toprank = ranks_objs[0][0]
         how_many = rankings.count(toprank)
         top_contenders = [robj[1] for robj in ranks_objs[:how_many]]
@@ -218,7 +219,7 @@ class TagRepository(AbstractTagSet):
     def all(self):
         """Return the set of all objects in the repository.
         """
-        return TagSet(itertools.chain.from_iterable(self.tag_objs.itervalues()))
+        return TagSet(itertools.chain.from_iterable(self.tag_objs.values()))
 
     def queryTag(self, tag):
         """Return the set of objects referenced by the given tag.
