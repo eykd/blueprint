@@ -1,3 +1,4 @@
+@mods
 Feature: Mods can modify other blueprints
 
   Blueprints are taggable class objects. Each subclass of the

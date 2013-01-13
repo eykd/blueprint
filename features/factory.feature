@@ -1,3 +1,4 @@
+@factories
 Feature: Factories can produce mastered blueprints
 
   Scenario: Producing a mastered, modded blueprint

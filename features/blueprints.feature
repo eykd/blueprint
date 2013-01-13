@@ -1,3 +1,4 @@
+@blueprints
 Feature: Blueprints as Taggable Classes
 
   Blueprints are taggable class objects. Each subclass of the
