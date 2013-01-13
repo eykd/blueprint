@@ -5,6 +5,12 @@ import collections
 
 from blueprint import fields
 
+try:
+    _ = xrange
+    del _
+except NameError:
+    xrange = range  # Python 3
+
 __all__ = ['MarkovChain']
 
 
