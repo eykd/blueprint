@@ -10,7 +10,7 @@ from setuptools import setup
 
 
 PROJECT = 'python-blueprint'
-VERSION = '0.5'
+VERSION = '0.6'
 URL = 'https://github.com/eykd/blueprint'
 AUTHOR = 'David Eyk'
 AUTHOR_EMAIL = 'david.eyk@gmail.com'
@@ -34,14 +34,17 @@ setup(
     url=URL,
     license=read_file('LICENSE'),
     packages=['blueprint'],
+    install_requires=['six'],
     include_package_data=True,
     zip_safe=False,
     classifiers=[
         # see http://pypi.python.org/pypi?:action=list_classifiers
-        # -*- Classifiers -*- 
+        # -*- Classifiers -*-
         "Programming Language :: Python",
         "Topic :: Games/Entertainment",
         "Topic :: Artistic Software",
         "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
     ],
 )

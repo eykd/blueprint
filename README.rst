@@ -130,7 +130,7 @@ object with the ``is_generator`` flag). These are called "generators"
 ("contractors" in squidi's terminology) because they're intended to be
 used to generate your final entity, whether it be a ``dict`` or a WAD
 file.
-   
+
 
 ====
 Tags
@@ -162,7 +162,7 @@ Mods
 
 Sometimes, you'll want to dynamically modify a blueprint. To do this,
 create a subclass of ``Mod``. Mods are just special blueprints::
-   
+
     class OfDoom(blueprint.Mod):
         name = blueprint.FormatTemplate('{meta.source.name} of DOOM')
         value = lambda _: _.meta.source.value * 5
@@ -231,16 +231,42 @@ on github <https://github.com/eykd/blueprint/issues>`_.
 On github, bleeding-edge development work is done on the ``develop``
 branch. ``master`` *should* always be stable.
 
-Tests are written using the `behave`_ BDD framework, and may be found 
-in the ``features/`` folder. To run the test suite, invoke ``behave`` 
+Tests are written using the `behave`_ BDD framework, and may be found
+in the ``features/`` folder. To run the test suite, invoke ``behave``
 from the project root.
 
 .. _behave: http://packages.python.org/behave/
 
 
+===========
+DEVELOPMENT
+===========
+
+Itching to hack on blueprint? Fork the repository on `on github`_ and
+submit a pull request. If you're not sure what you're doing, follow
+`these guidelines`_.
+
+.. _on github: http://github.com/eykd/blueprint/
+.. _these guidelines: https://gun.io/blog/how-to-github-fork-branch-and-pull-request/
+
+If you're really high class, your code will be `PEP8`_ compliant, and
+will pass the `pep8`_ static checker like so::
+
+    pep8 --ignore=E221,E701,E202,E203,E225,E251,E5,W291,W293 mymodule.py
+
+.. _PEP8: http://www.python.org/dev/peps/pep-0008/
+.. _pep8: http://pypi.python.org/pypi/pep8/
+
+
 =========
 CHANGELOG
 =========
+
+- **0.6**: Experimental Python 3 compatibility, and bug-fixes:
+
+  - **Feature:** Experimental Python 3 compatibility, thanks to `0ion9`_.
+
+  - **Major bug fix:** Fixed bug in dice compilation.
 
 - **0.5**: A couple new features, some interfaces and many bug-fixes:
 
@@ -289,3 +315,6 @@ CHANGELOG
 - **0.2**: Added Mods. Bugfixes.
 
 - **0.1**: Initial release.
+
+
+.. _0ion9: https://github.com/0ion9
