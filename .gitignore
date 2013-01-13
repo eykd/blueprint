@@ -2,3 +2,6 @@
 dist/
 Blueprint.egg-info/
 python_blueprint.egg-info/
+.venv
+blueprint.sublime-project
+blueprint.sublime-workspace
