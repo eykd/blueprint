@@ -48,7 +48,7 @@ class results(list):
 
     def __float__(self):
         return float(sum(self))
-    
+
     def _convert(self, other):
         return type(other)(self)
 
@@ -91,10 +91,12 @@ def dcompile(dice_expr):
     ``eval``.
     """
     assert safe_cp.match(dice_expr), 'Invalid dice expression: %s' % dice_expr
-    expr = dice_cp.sub('results(random.randint(1, \g<sides>) for x in xrange(\g<num>))',
+    expr = dice_cp.sub('results(random.randint(1, \g<sides>) '
+                       'for x in xrange(\g<num>))',
                        dice_expr)
-    expr = fudge_cp.sub('results(random.choice([-1, -1, 0, 0, 1, 1]) for x in xrange(\g<num>))',
-                        dice_expr)
+    expr = fudge_cp.sub(('results(random.choice([-1, -1, 0, 0, 1, 1]) '
+                         'for x in xrange(\g<num>))'),
+                        expr)
     return compile(expr, 'dice_expression: (%s)' % dice_expr, 'eval')
 
 
