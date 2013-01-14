@@ -14,6 +14,7 @@ try:
     del _
 except NameError:
     xrange = range  # Python 3
+    basestring = str
 
 __all__ = ['Field', 'RandomInt', 'Dice', 'DiceTable',
            'PickOne', 'PickFrom', 'All',
@@ -61,8 +62,20 @@ class Field(object):
     def __div__(self, b):
         return Divide(self, b)
 
+    __truediv__ = __div__
+
+    def __floordiv__(self, b):
+        return FloorDivide(self, b)
+
     def __rdiv__(self, a):
         return Divide(a, self)
+
+    __rtruediv__ = __rdiv__
+
+    def __rfloordiv__(self, a):
+        return FloorDivide(a, self)
+
+
 
 
 class _Operator(Field):
@@ -120,11 +133,15 @@ class Multiply(_Operator):
 class Divide(_Operator):
     """When resolved, divides all the provided arguments and returns the result.
     """
-    try:
-        op = operator.div
-    except AttributeError:  # Python 3 (note that this returns a float unless: operands are integral and there is no remainder.)
-        op = operator.truediv
+    op = operator.truediv
     sym = '/'
+
+
+class FloorDivide(_Operator):
+    """When resolved, divides-with-truncation all the provided arguments and returns the result.
+    """
+    op = operator.floordiv
+    sym = '//'
 
 
 class RandomInt(Field):

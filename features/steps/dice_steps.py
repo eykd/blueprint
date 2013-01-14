@@ -3,6 +3,10 @@
 """
 from behave import given, when, then
 
+try:
+    _ = xrange
+except NameError:
+    xrange = range # Python 3
 
 @given(u'I have {dice_expr}')
 def dice_step(context, dice_expr):
