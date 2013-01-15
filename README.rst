@@ -15,6 +15,7 @@ on a `series of articles`_ by Sean Howard. `Overview here`_.
 - `Factories`_
 - `TODO`_
 - `HELP`_
+- `DEVELOPMENT`_
 - `Changelog`_
 
 
@@ -228,15 +229,6 @@ HELP
 If you run into trouble, or find a bug, file an issue in the `tracker
 on github <https://github.com/eykd/blueprint/issues>`_.
 
-On github, bleeding-edge development work is done on the ``develop``
-branch. ``master`` *should* always be stable.
-
-Tests are written using the `behave`_ BDD framework, and may be found
-in the ``features/`` folder. To run the test suite, invoke ``behave``
-from the project root.
-
-.. _behave: http://packages.python.org/behave/
-
 
 ===========
 DEVELOPMENT
@@ -249,7 +241,17 @@ submit a pull request. If you're not sure what you're doing, follow
 .. _on github: http://github.com/eykd/blueprint/
 .. _these guidelines: https://gun.io/blog/how-to-github-fork-branch-and-pull-request/
 
-If you're really high class, your code will be `PEP8`_ compliant, and
+On github, bleeding-edge development works should be done on feature
+branches. ``master`` *should* always remain stable.
+
+Tests are written using the `behave`_ BDD framework, and may be found
+in the ``features/`` folder. To run the test suite, invoke ``behave``
+from the project root.
+
+.. _behave: http://packages.python.org/behave/
+
+
+ If you're really high class, your code will be `PEP8`_ compliant, and
 will pass the `pep8 static checker`_ like so::
 
     pep8 --ignore=E221,E701,E202,E203,E225,E251,E5,W291,W293 mymodule.py
