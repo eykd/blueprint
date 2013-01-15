@@ -262,6 +262,8 @@ will pass the `pep8`_ static checker like so::
 CHANGELOG
 =========
 
+- **0.6.1**: Fixed Python 3 compatibility in dice roller.
+
 - **0.6**: Experimental Python 3 compatibility, and bug-fixes:
 
   - **Feature:** Experimental Python 3 compatibility, thanks to `0ion9`_.

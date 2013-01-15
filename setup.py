@@ -10,7 +10,7 @@ from setuptools import setup
 
 
 PROJECT = 'python-blueprint'
-VERSION = '0.6'
+VERSION = '0.6.1'
 URL = 'https://github.com/eykd/blueprint'
 AUTHOR = 'David Eyk'
 AUTHOR_EMAIL = 'david.eyk@gmail.com'
