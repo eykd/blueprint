@@ -250,12 +250,12 @@ submit a pull request. If you're not sure what you're doing, follow
 .. _these guidelines: https://gun.io/blog/how-to-github-fork-branch-and-pull-request/
 
 If you're really high class, your code will be `PEP8`_ compliant, and
-will pass the `pep8`_ static checker like so::
+will pass the `pep8 static checker`_ like so::
 
     pep8 --ignore=E221,E701,E202,E203,E225,E251,E5,W291,W293 mymodule.py
 
 .. _PEP8: http://www.python.org/dev/peps/pep-0008/
-.. _pep8: http://pypi.python.org/pypi/pep8/
+.. _pep8 static checker: http://pypi.python.org/pypi/pep8/
 
 
 =========
