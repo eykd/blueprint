@@ -7,9 +7,10 @@ __all__ = ['roll', 'dcompile']
 
 try:
     _ = xrange
-    del _
 except NameError:
-    xrange = range  # Python 3
+    # Python 3
+    xrange = range
+    basestring = str
 
 dice_cp = re.compile(r'(?P<num>\d+)d(?P<sides>\d+)')
 fudge_cp = re.compile(r'(?P<num>\d+)d[fF]')
@@ -73,8 +74,17 @@ class results(list):
     def __div__(self, b):
         return self._convert(b) / b
 
+    __truediv__ = __div__
+    def __floordiv__(self, b):
+        return self._convert(b) // b
+
     def __rdiv__(self, a):
         return a / self._convert(a)
+
+    __rtruediv__ = __rdiv__
+
+    def __rfloordiv__(self, a):
+        return a // self._convert(a)
 
     def __eq__(self, b):
         return b == self._convert(b)
@@ -115,5 +125,6 @@ def roll(dice_expr, random_obj=None, **kwargs):
     local_vars = dict(**kwargs)
     local_vars['random'] = random_obj
     local_vars['results'] = results
+    local_vars['xrange'] = xrange
 
     return eval(dice_expr, local_vars)
