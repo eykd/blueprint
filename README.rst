@@ -250,8 +250,7 @@ from the project root.
 
 .. _behave: http://packages.python.org/behave/
 
-
- If you're really high class, your code will be `PEP8`_ compliant, and
+If you're really high class, your code will be `PEP8`_ compliant, and
 will pass the `pep8 static checker`_ like so::
 
     pep8 --ignore=E221,E701,E202,E203,E225,E251,E5,W291,W293 mymodule.py
