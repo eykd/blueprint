@@ -2,19 +2,19 @@
 """blueprint.collections -- a collection class for blueprints.
 """
 import sys
-import collections
+from collections.abc import Sequence, Callable
 
 __all__ = ['BlueprintCollection']
 
 
-class BlueprintCollection(collections.Sequence, collections.Callable):
+class BlueprintCollection(Sequence, Callable):
     def __init__(self, blueprint, seed='', **kwargs):
         self.blueprint = blueprint
         self.seed = seed
         self.kwargs = kwargs
 
     def __len__(self):
-        return sys.maxint
+        return sys.maxsize
 
     def __iter__(self):
         return iter(self)
@@ -37,9 +37,9 @@ class BlueprintCollection(collections.Sequence, collections.Callable):
                 return (self(seed=seed % i, **self.kwargs) 
                         for i in it.count(idx.start or 0, idx.step or 1))
             else:
-                return [self(seed=seed % i) 
-                        for i in xrange(idx.start or 0,
-                                        idx.stop, idx.step or 1)]
+                return [self(seed=seed % i)
+                        for i in range(idx.start or 0,
+                                       idx.stop, idx.step or 1)]
         else:
             seed = u"%s%s" % (self.seed, idx)
             return self(seed=seed)

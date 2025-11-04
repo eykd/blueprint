@@ -7,7 +7,6 @@ import inspect
 import copy
 from collections import deque
 import random
-from six import with_metaclass
 
 from . import taggables
 from . import fields
@@ -95,7 +94,12 @@ class BlueprintMeta(type):
 
     def __new__(cls, name, bases, attrs):
         _new = attrs.pop('__new__', None)
-        new_attrs = {'__new__': _new} if _new is not None else {}
+        _classcell = attrs.pop('__classcell__', None)
+        new_attrs = {}
+        if _new is not None:
+            new_attrs['__new__'] = _new
+        if _classcell is not None:
+            new_attrs['__classcell__'] = _classcell
         new_class = super(BlueprintMeta, cls).__new__(cls, name, bases, new_attrs)
         new_class.tags = attrs.pop('tags', '')
 
@@ -139,7 +143,7 @@ class BlueprintMeta(type):
             )
 
 
-class Blueprint(with_metaclass(BlueprintMeta, taggables.TaggableClass)):
+class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
     """A magical blueprint.
 
     To create a blueprint, subclass Blueprint and add your

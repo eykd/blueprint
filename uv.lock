@@ -503,9 +503,6 @@ wheels = [
 [[package]]
 name = "python-blueprint"
 source = { editable = "." }
-dependencies = [
-    { name = "six" },
-]
 
 [package.dev-dependencies]
 dev = [
@@ -523,7 +520,6 @@ test = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "six", specifier = ">=1.17.0" }]
 
 [package.metadata.requires-dev]
 dev = [

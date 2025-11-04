@@ -2,6 +2,7 @@
 """blueprint.markov -- Markov Chain generator.
 """
 import collections
+from collections.abc import Mapping
 
 from blueprint import fields
 
@@ -14,7 +15,7 @@ except NameError:
 __all__ = ['MarkovChain']
 
 
-class MarkovChain(fields.Field, collections.Mapping):
+class MarkovChain(fields.Field, Mapping):
     """Uses a Markov Chain to generate random sequences.
 
     Derived from Peter Corbett's CGI random name generator, with input
