@@ -5,3 +5,4 @@ python_blueprint.egg-info/
 .venv
 blueprint.sublime-project
 blueprint.sublime-workspace
+src/blueprint/_version.py

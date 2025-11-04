@@ -394,9 +394,15 @@ def resolve(parent, field):
     """
     while callable(field):
         if inspect.ismethod(field):
-            field = field()
+            try:
+                field = field(seed=parent.meta.random.random())
+            except TypeError:
+                field = field()
         else:
-            field = field(parent)
+            try:
+                field = field(parent=parent, seed=parent.meta.random.random())
+            except TypeError:
+                field = field(parent)
     if field.__class__.__name__ == 'generator':
         field = list(resolve(parent, i) for i in field)
     return field
