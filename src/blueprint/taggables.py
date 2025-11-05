@@ -1,6 +1,7 @@
 """blueprint.taggables -- tag repositories and query interface for selecting contained items."""
 
 import contextlib
+import functools
 import itertools
 import operator
 import time
@@ -93,8 +94,7 @@ class AbstractTagSet:
                 elif tag not in with_tags:
                     rank -= 1
             rankings.append(rank)
-        # Python 3 zip is an iterator, ergo no itertools.izip available.)
-        ranks_objs = sorted(zip(rankings, objects), reverse=True, key=operator.itemgetter(0))
+        ranks_objs = sorted(zip(rankings, objects, strict=False), reverse=True, key=operator.itemgetter(0))
         toprank = ranks_objs[0][0]
         how_many = rankings.count(toprank)
         top_contenders = [robj[1] for robj in ranks_objs[:how_many]]
@@ -111,6 +111,7 @@ class AbstractTagSet:
         return winner
 
 
+@functools.total_ordering
 class Taggable:
     """A taggable object."""
 
@@ -144,11 +145,15 @@ class Taggable:
     def remove_tag(self, *tags) -> None:
         self.tag_repo.untagObject(self, *tags)
 
-    def __cmp__(self, other):
-        result = 1
-        if hasattr(other, 'tags'):
-            result = cmp(self.tags, other.tags)
-        return result
+    def __eq__(self, other):
+        if not hasattr(other, 'tags'):
+            return NotImplemented
+        return self.tags == other.tags
+
+    def __lt__(self, other):
+        if not hasattr(other, 'tags'):
+            return NotImplemented
+        return sorted(self.tags) < sorted(other.tags)
 
 
 class TaggableClass:
