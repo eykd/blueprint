@@ -33,7 +33,7 @@ class Meta:
     - ``seed``: the seed used to initialize the ``random.Random`` instance.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.fields = set()
         self.mastered = False
         self.abstract = False
@@ -52,7 +52,7 @@ class Meta:
 
         meta = Meta()
         for name, value in self.__dict__.items():
-            if name == 'source' or name == 'parent':
+            if name in {'source', 'parent'}:
                 setattr(meta, name, value)
             elif name == 'random':
                 meta.random = random.Random()
@@ -68,7 +68,7 @@ camelcase_cp = re.compile(r'[A-Z][^A-Z]+')
 class BlueprintMeta(type):
     """Metaclass for blueprints. Handles the declarative magic."""
 
-    def __init__(cls, name, bases, attrs):
+    def __init__(cls, name, bases, attrs) -> None:
         if not hasattr(cls, 'tag_repo'):
             # This branch only executes when processing the mount point itself.
             # So, since this is a new plugin type, not an implementation, this
@@ -91,14 +91,14 @@ class BlueprintMeta(type):
             cls.tag_repo.addObject(cls)
 
     def __new__(cls, name, bases, attrs):
-        _new = attrs.pop('__new__', None)
-        _classcell = attrs.pop('__classcell__', None)
+        new = attrs.pop('__new__', None)
+        classcell = attrs.pop('__classcell__', None)
         new_attrs = {}
-        if _new is not None:
-            new_attrs['__new__'] = _new
-        if _classcell is not None:
-            new_attrs['__classcell__'] = _classcell
-        new_class = super(BlueprintMeta, cls).__new__(cls, name, bases, new_attrs)
+        if new is not None:
+            new_attrs['__new__'] = new
+        if classcell is not None:
+            new_attrs['__classcell__'] = classcell
+        new_class = super().__new__(cls, name, bases, new_attrs)
         new_class.tags = attrs.pop('tags', '')
 
         # Set up Meta options
@@ -108,7 +108,7 @@ class BlueprintMeta(type):
             for key, value in usermeta.__dict__.items():
                 if not key.startswith('_'):
                     setattr(meta, key, value)
-        meta.fields.update(a for a in attrs.keys() if not a.startswith('_') and not hasattr(attrs[a], 'is_generator'))
+        meta.fields.update(a for a in attrs if not a.startswith('_') and not hasattr(attrs[a], 'is_generator'))
         for base in bases:
             if hasattr(base, 'meta'):
                 meta.fields.update(base.meta.fields)
@@ -119,17 +119,17 @@ class BlueprintMeta(type):
 
         return new_class
 
-    def add_to_class(cls, name, value):
+    def add_to_class(cls, name, value) -> None:
         if hasattr(value, 'contribute_to_class'):
             value.contribute_to_class(cls, name)
         else:
             setattr(cls, name, value)
 
-    def __repr__(cls):
-        return '<%s:\n    %s\n    >' % (
+    def __repr__(cls) -> str:
+        return '<{}:\n    {}\n    >'.format(
             cls.__name__,
             '\n    '.join(
-                '%s -- %s' % (n, '\n'.join('    %s' % i for i in repr(getattr(cls, n)).splitlines()).strip())
+                '{} -- {}'.format(n, '\n'.join(f'    {i}' for i in repr(getattr(cls, n)).splitlines()).strip())
                 for n in sorted(cls.meta.fields)
             ),
         )
@@ -167,16 +167,16 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
         True
     """
 
-    def __repr__(self):
-        return '<%s:\n    %s\n    >' % (
+    def __repr__(self) -> str:
+        return '<{}:\n    {}\n    >'.format(
             self.__class__.__name__,
             '\n    '.join(
-                '%s -- %s' % (n, '\n'.join('    %s' % i for i in repr(getattr(self, n)).splitlines()).strip())
+                '{} -- {}'.format(n, '\n'.join(f'    {i}' for i in repr(getattr(self, n)).splitlines()).strip())
                 for n in sorted(self.meta.fields)
             ),
         )
 
-    def __init__(self, parent=None, seed=None, **kwargs):
+    def __init__(self, parent=None, seed=None, **kwargs) -> None:
         self.meta = copy.deepcopy(self.meta)
         if parent is not None:
             self.meta.parent = parent
@@ -198,7 +198,7 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
         deferred_to_end = deque()
         deferred_to_end_names = set()
 
-        def resolve(name, field):
+        def resolve(name, field) -> None:
             # print "Can we resolve", name
             if callable(field):
                 if hasattr(field, 'depends_on') and not field.depends_on.issubset(resolved):
@@ -236,4 +236,4 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
 
     @fields.generator
     def as_dict(self):
-        return dict((n, getattr(self, n)) for n in self.meta.fields)
+        return {n: getattr(self, n) for n in self.meta.fields}

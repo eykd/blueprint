@@ -1,6 +1,8 @@
 """blueprint.taggables -- tag repositories and query interface for selecting contained items."""
 
+import contextlib
 import itertools
+import operator
 import time
 from collections import defaultdict
 
@@ -45,10 +47,7 @@ class AbstractTagSet:
         return objs
 
     def query(self, with_tags=(), or_tags=(), not_tags=()):
-        if with_tags:
-            objects = self.queryTagsIntersection(*with_tags)
-        else:
-            objects = self.all()
+        objects = self.queryTagsIntersection(*with_tags) if with_tags else self.all()
         if or_tags:
             objects = objects.queryTagsUnion(*or_tags)
         if not_tags:
@@ -95,7 +94,7 @@ class AbstractTagSet:
                     rank -= 1
             rankings.append(rank)
         # Python 3 zip is an iterator, ergo no itertools.izip available.)
-        ranks_objs = sorted(getattr(itertools, 'izip', zip)(rankings, objects), reverse=True, key=lambda v: v[0])
+        ranks_objs = sorted(getattr(itertools, 'izip', zip)(rankings, objects), reverse=True, key=operator.itemgetter(0))
         toprank = ranks_objs[0][0]
         how_many = rankings.count(toprank)
         top_contenders = [robj[1] for robj in ranks_objs[:how_many]]
@@ -104,7 +103,7 @@ class AbstractTagSet:
             winner = top_contenders[0]
         else:
             by_access = [(getattr(cntndr, 'last_picked', 0), cntndr) for cntndr in top_contenders]
-            by_access.sort(key=lambda v: v[0])
+            by_access.sort(key=operator.itemgetter(0))
             winner = by_access[0][1]
 
         winner.last_picked = time.time()
@@ -115,22 +114,22 @@ class AbstractTagSet:
 class Taggable:
     """A taggable object."""
 
-    def __init__(self, tag_repo, *tags):
-        super(Taggable, self).__init__()
+    def __init__(self, tag_repo, *tags) -> None:
+        super().__init__()
         self.tags = set(tags)
         self._tag_repo = None
         self.tag_repo = tag_repo
         self.last_picked = 0.0
 
-    def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, ' '.join(self.tags))
+    def __repr__(self) -> str:
+        return '<{}: {}>'.format(self.__class__.__name__, ' '.join(self.tags))
 
     @property
     def tag_repo(self):
         return self._tag_repo
 
     @tag_repo.setter
-    def tag_repo(self, repo):
+    def tag_repo(self, repo) -> None:
         if self._tag_repo is not None and repo is not self._tag_repo:
             self._tag_repo.removeObject(self)
 
@@ -139,10 +138,10 @@ class Taggable:
 
         self._tag_repo = repo
 
-    def addTag(self, *tags):
+    def addTag(self, *tags) -> None:
         self.tag_repo.tagObject(self, *tags)
 
-    def removeTag(self, *tags):
+    def removeTag(self, *tags) -> None:
         self.tag_repo.untagObject(self, *tags)
 
     def __cmp__(self, other):
@@ -159,12 +158,12 @@ class TaggableClass:
     """
 
     @classmethod
-    def addTag(klass, *tags):
-        klass.tag_repo.tagObject(klass, *tags)
+    def addTag(cls, *tags) -> None:
+        cls.tag_repo.tagObject(cls, *tags)
 
     @classmethod
-    def removeTag(klass, *tags):
-        klass.tag_repo.untagObject(klass, *tags)
+    def removeTag(cls, *tags) -> None:
+        cls.tag_repo.untagObject(cls, *tags)
 
     last_picked = 0.0
 
@@ -172,11 +171,11 @@ class TaggableClass:
 class TagRepository(AbstractTagSet):
     """An example implementation for storing and querying tags."""
 
-    def __init__(self, *objs):
+    def __init__(self, *objs) -> None:
         self.tag_objs = defaultdict(TagSet)
         self.addObject(*objs)
 
-    def addObject(self, *objs, **kwargs):
+    def addObject(self, *objs, **kwargs) -> None:
         for obj in objs:
             if kwargs.get('check_repo', True) and obj.tag_repo is not self:
                 obj.tag_repo = self
@@ -184,32 +183,28 @@ class TagRepository(AbstractTagSet):
                 for tag in resolve_tags(*obj.tags):
                     self.tag_objs[tag].add(obj)
 
-    def removeObject(self, *objs):
+    def removeObject(self, *objs) -> None:
         for obj in objs:
             for tag in resolve_tags(*obj.tags):
-                try:
+                with contextlib.suppress(KeyError):
                     self.tag_objs[tag].remove(obj)
-                except KeyError:
-                    pass
 
-    def addTags(self, *tags):
+    def addTags(self, *tags) -> None:
         """Add tags to the db."""
         for tag in resolve_tags(*tags):
             self.tag_objs[tag]
 
-    def tagObject(self, obj, *tags):
+    def tagObject(self, obj, *tags) -> None:
         """Tag an object."""
         for tag in resolve_tags(*tags):
             self.tag_objs[tag].add(obj)
         obj.tags.update(tags)
 
-    def untagObject(self, obj, *tags):
+    def untagObject(self, obj, *tags) -> None:
         """Untag an object."""
         for tag in resolve_tags(*tags):
-            try:
+            with contextlib.suppress(KeyError):
                 self.tag_objs[tag].remove(obj)
-            except KeyError:
-                pass
         obj.tags.difference_update(tags)
 
     def all(self):

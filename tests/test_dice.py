@@ -7,7 +7,7 @@ import pytest
 
 
 @pytest.mark.parametrize(
-    'dice_expr,min_sum,max_sum,min_roll,max_roll',
+    ('dice_expr', 'min_sum', 'max_sum', 'min_roll', 'max_roll'),
     [
         # Normal dice
         ('1d6', 1, 6, 1, 6),

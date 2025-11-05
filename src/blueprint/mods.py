@@ -29,7 +29,7 @@ class Mod(base.Blueprint):
     """
 
     def __new__(cls, source=None, *args, **kwargs):
-        base_mod = super(Mod, cls).__new__(cls, *args, **kwargs)
+        base_mod = super().__new__(cls, *args, **kwargs)
         if source is None:
             return base_mod
         base_mod.meta.source = source

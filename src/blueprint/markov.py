@@ -23,7 +23,7 @@ class MarkovChain(fields.Field, Mapping):
     http://www.pick.ucam.org/~ptc24/mchain.html
     """
 
-    def __init__(self, source_list, chainlen=2, max_length=10):
+    def __init__(self, source_list, chainlen=2, max_length=10) -> None:
         if 1 > chainlen > 10:
             raise ValueError('Chain length must be between 1 and 10, inclusive')
         self._dict = collections.defaultdict(list)
@@ -34,7 +34,7 @@ class MarkovChain(fields.Field, Mapping):
     def next(self):
         return self.getRandomName()
 
-    def readData(self, names, destroy=False):
+    def readData(self, names, destroy=False) -> None:
         if destroy:
             self._dict.clear()
 
@@ -60,7 +60,7 @@ class MarkovChain(fields.Field, Mapping):
                 continue
             if suffix == '\n' or len(name) == self.max_length:
                 break
-            name = ''.join((name, suffix))
+            name = f'{name}{suffix}'
             prefix = ''.join((prefix[1:], suffix))
         return name
 
@@ -70,13 +70,13 @@ class MarkovChain(fields.Field, Mapping):
     def __getitem__(self, key):
         return self._dict[key]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._dict)
 
     def __iter__(self):
         return iter(self._dict)
 
-    def add_key(self, prefix, suffix):
+    def add_key(self, prefix, suffix) -> None:
         self._dict[prefix].append(suffix)
 
     def get_suffix(self, prefix, parent):

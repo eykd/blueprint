@@ -105,8 +105,12 @@ def of_doom() -> type[blueprint.Mod]:
 
     class OfDoom(blueprint.Mod):
         name = blueprint.FormatTemplate('{meta.source.name} of DOOM')
-        value = lambda _: _.meta.source.value * 20
-        damage = lambda _: _.meta.source.damage * 20
+
+        def value(self):
+            return self.meta.source.value * 20
+
+        def damage(self):
+            return self.meta.source.damage * 20
 
     return OfDoom
 

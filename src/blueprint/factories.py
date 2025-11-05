@@ -26,12 +26,13 @@ class Factory(base.Blueprint):
         if cls.product is None:
             raise ValueError('Factory subclasses must define a `product` field in order to be used.')
 
-        factory = super(Factory, cls).__new__(cls, *args, **kwargs)
+        factory = super().__new__(cls, *args, **kwargs)
         factory.__init__(*args, **kwargs)
 
         if not isinstance(factory.product, base.Blueprint) and not isinstance(factory.product, base.BlueprintMeta):
+            msg = f'The `Factory.product` field must resolve to a single blueprint when mastered.\n{factory.product!r}'
             raise TypeError(
-                'The `Factory.product` field must resolve to a single blueprint when mastered.\n%r' % factory.product
+                msg
             )
 
         return factory()
@@ -46,7 +47,7 @@ class Factory(base.Blueprint):
             product = product(parent=parent, *args, **kwargs)
 
         for name in self.meta.fields:
-            if name in ('product', 'mods'):
+            if name in {'product', 'mods'}:
                 continue
             setattr(product, name, getattr(self, name))
 

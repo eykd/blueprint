@@ -96,6 +96,6 @@ class TestBlueprintSelection:
         old_weapon = None
         for _ in range(10):
             weapon = repo.select(with_tags=('Weapon', 'primitive'))
-            assert weapon in (spear, pointed_stick, club)
+            assert weapon in {spear, pointed_stick, club}
             assert weapon is not old_weapon
             old_weapon = weapon

@@ -37,10 +37,10 @@ safe_cp = re.compile(
 
 
 class results(list):
-    def __int__(self):
+    def __int__(self) -> int:
         return int(sum(self))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(int(self))
 
     def __unicode__(self):
@@ -49,7 +49,7 @@ class results(list):
     def __hash__(self):
         return hash(int(self))
 
-    def __float__(self):
+    def __float__(self) -> float:
         return float(sum(self))
 
     def _convert(self, other):
@@ -103,7 +103,7 @@ def dcompile(dice_expr):
     code (list comprehensions), and compiles the rest for a future
     ``eval``.
     """
-    assert safe_cp.match(dice_expr), 'Invalid dice expression: %s' % dice_expr
+    assert safe_cp.match(dice_expr), f'Invalid dice expression: {dice_expr}'
     expr = dice_cp.sub(
         r'results(random.randint(1, \g<sides>) '
         r'for x in xrange(\g<num>))',
@@ -116,7 +116,7 @@ def dcompile(dice_expr):
         ),
         expr,
     )
-    return compile(expr, 'dice_expression: (%s)' % dice_expr, 'eval')
+    return compile(expr, f'dice_expression: ({dice_expr})', 'eval')
 
 
 def roll(dice_expr, random_obj=None, **kwargs):

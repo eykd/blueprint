@@ -7,7 +7,7 @@ import blueprint
 
 
 def test_factory_produces_magical_weapon(
-    magical_item_prefix: type[blueprint.Mod], of_doom: type[blueprint.Mod]
+    magical_item_prefix: type[blueprint.Mod], of_doom: type[blueprint.Mod], weapon: type[blueprint.Blueprint]
 ) -> None:
     """Test that factories can produce mastered, modded blueprints.
 
@@ -23,7 +23,7 @@ def test_factory_produces_magical_weapon(
 
     item = MagicalItemFactory()
 
-    # FIXME: item is *sometimes* a subclass of a Doppelganger Weapon.
-    # assert isinstance(item, Weapon)
+    # TODO: item is *sometimes* a subclass of a Doppelganger Weapon.
+    # assert isinstance(item, weapon)  # noqa: ERA001
     assert item.name.endswith('of DOOM')
     assert item.damage >= 20, f'Expected damage >= 20, got {item.damage} for {item}'

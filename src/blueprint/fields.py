@@ -46,10 +46,10 @@ class Field:
     will be called with one argument, the parent blueprint itself.
     """
 
-    def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, str(self))
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__}: {self!s}>'
 
-    def __str__(self):
+    def __str__(self) -> str:
         return ''
 
     def __add__(self, b):
@@ -93,22 +93,19 @@ class _Operator(Field):
     op = None
     sym = ''
 
-    def __init__(self, *items):
+    def __init__(self, *items) -> None:
         self.items = items
 
-    def __repr__(self):
-        return '(%s)' % (str(self))
+    def __repr__(self) -> str:
+        return f'({self!s})'
 
-    def __str__(self):
-        return (' %s ' % self.sym).join(repr(i) for i in self.items)
+    def __str__(self) -> str:
+        return (f' {self.sym} ').join(repr(i) for i in self.items)
 
     def __call__(self, parent):
         result = None
         for item in self.items:
-            if result is None:
-                result = self.resolve(parent, item)
-            else:
-                result = self.op(result, self.resolve(parent, item))
+            result = self.resolve(parent, item) if result is None else self.op(result, self.resolve(parent, item))
         return result
 
     def resolve(self, parent, item):
@@ -155,12 +152,12 @@ class FloorDivide(_Operator):
 class RandomInt(Field):
     """When resolved, returns a random integer between ``start`` and ``end``."""
 
-    def __init__(self, start, end):
+    def __init__(self, start, end) -> None:
         self.start = start
         self.end = end
 
-    def __str__(self):
-        return '%s...%s' % (self.start, self.end)
+    def __str__(self) -> str:
+        return f'{self.start}...{self.end}'
 
     def __call__(self, parent):
         return parent.meta.random.randint(self.start, self.end)
@@ -190,16 +187,15 @@ class Dice(Field):
         'random.choice(3d6)'  # -> a random integer result chosen from 3 rolls.
     """
 
-    def __init__(self, dice_expr, **local_kwargs):
+    def __init__(self, dice_expr, **local_kwargs) -> None:
         self.expr = dice_expr
         self.compiled_expr = dice.dcompile(dice_expr)
         self.local_kwargs = local_kwargs
 
     def __call__(self, parent):
-        result = dice.roll(self.compiled_expr, random_obj=parent.meta.random, parent=parent, **self.local_kwargs)
-        return result
+        return dice.roll(self.compiled_expr, random_obj=parent.meta.random, parent=parent, **self.local_kwargs)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.expr)
 
 
@@ -210,8 +206,8 @@ class DiceTable(Dice):
 
     range_sep_cp = re.compile(r'(?:\.\.)|[:]')
 
-    def __init__(self, dice_expr, table, default=None, **local_kwargs):
-        super(DiceTable, self).__init__(dice_expr, **local_kwargs)
+    def __init__(self, dice_expr, table, default=None, **local_kwargs) -> None:
+        super().__init__(dice_expr, **local_kwargs)
         self.table = defaultdict(lambda: default)
         for key, value in table.iteritems():
             if isinstance(key, basestring):
@@ -227,21 +223,21 @@ class DiceTable(Dice):
                 self.table[key] = value
 
     def __call__(self, parent):
-        result = str(super(DiceTable, self).__call__(parent))
+        result = str(super().__call__(parent))
         result = self.table[result]
         return resolve(parent, result)
 
-    def __str__(self):
-        return '%s for %s' % (str(self.expr), pprint.pformat(self.table))
+    def __str__(self) -> str:
+        return f'{self.expr!s} for {pprint.pformat(self.table)}'
 
 
 class PickOne(Field):
     """When resolved, returns a random item from the arguments provided."""
 
-    def __init__(self, *choices):
+    def __init__(self, *choices) -> None:
         self.choices = choices
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.choices)
 
     def __call__(self, parent):
@@ -252,10 +248,10 @@ class PickOne(Field):
 class PickFrom(Field):
     """When resolved, returns a random item from the collection provided."""
 
-    def __init__(self, collection):
+    def __init__(self, collection) -> None:
         self.collection = collection
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.collection)
 
     def __call__(self, parent):
@@ -266,10 +262,10 @@ class PickFrom(Field):
 class All(Field):
     """When resolved, returns a list of the provided items, themselves resolved."""
 
-    def __init__(self, *items):
+    def __init__(self, *items) -> None:
         self.items = items
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.items)
 
     def __call__(self, parent):
@@ -305,10 +301,10 @@ class FormatTemplate(Field):
 
     _defer_to_end = True
 
-    def __init__(self, template):
+    def __init__(self, template) -> None:
         self.template = template
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.template)
 
     def __get__(self, parent, type=None):
@@ -323,7 +319,7 @@ class FormatTemplate(Field):
 
 
 class Property(Field):
-    def __init__(self, func):
+    def __init__(self, func) -> None:
         self.func = func
 
     def __get__(self, parent, type=None):
@@ -334,7 +330,7 @@ class Property(Field):
 
 
 class WithTags(Field):
-    """When resolved, returns the set of all blueprints selected by the given tags.
+    r"""When resolved, returns the set of all blueprints selected by the given tags.
 
     Takes multiple arguments. Arguments may be individual tags, or
     space-separated strings with multiple tags. Tags begininng with
@@ -345,7 +341,7 @@ class WithTags(Field):
     interesction), that is, \"all blueprints must have this tag\".
     """
 
-    def __init__(self, *tags):
+    def __init__(self, *tags) -> None:
         all_tags = set()
         for t in tags:
             all_tags.update(t.split())
@@ -363,16 +359,13 @@ class WithTags(Field):
                 self.with_tags.add(t)
 
     def __call__(self, parent):
-        if self.with_tags:
-            objects = parent.tag_repo.queryTagsIntersection(*self.with_tags)
-        else:
-            objects = parent.tag_repo
+        objects = parent.tag_repo.queryTagsIntersection(*self.with_tags) if self.with_tags else parent.tag_repo
         if self.or_tags:
             objects = objects.queryTagsUnion(*self.or_tags)
         if self.not_tags:
             objects = objects.queryTagsDifference(*self.not_tags)
 
-        return list(o for o in objects if not o.meta.abstract)
+        return [o for o in objects if not o.meta.abstract]
 
 
 def generator(func):
@@ -412,7 +405,7 @@ def resolve(parent, field):
             except TypeError:
                 field = field(parent)
     if field.__class__.__name__ == 'generator':
-        field = list(resolve(parent, i) for i in field)
+        field = [resolve(parent, i) for i in field]
     return field
 
 

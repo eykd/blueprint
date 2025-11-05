@@ -7,18 +7,18 @@ __all__ = ['BlueprintCollection']
 
 
 class BlueprintCollection(Sequence, Callable):
-    def __init__(self, blueprint, seed='', **kwargs):
+    def __init__(self, blueprint, seed='', **kwargs) -> None:
         self.blueprint = blueprint
         self.seed = seed
         self.kwargs = kwargs
 
-    def __len__(self):
+    def __len__(self) -> int:
         return sys.maxsize
 
     def __iter__(self):
         return iter(self)
 
-    def __contains__(self):
+    def __contains__(self) -> bool:
         return True
 
     def __call__(self, parent=None, seed=None, **kwargs):
@@ -29,9 +29,9 @@ class BlueprintCollection(Sequence, Callable):
 
     def __getitem__(self, idx):
         if isinstance(idx, slice):
-            seed = '%s%%s' % self.seed
+            seed = f'{self.seed}%s'
             if idx.stop is None:
                 return (self(seed=seed % i, **self.kwargs) for i in it.count(idx.start or 0, idx.step or 1))
             return [self(seed=seed % i) for i in range(idx.start or 0, idx.stop, idx.step or 1)]
-        seed = '%s%s' % (self.seed, idx)
+        seed = f'{self.seed}{idx}'
         return self(seed=seed)
