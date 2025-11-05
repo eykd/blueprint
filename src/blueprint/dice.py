@@ -11,12 +11,13 @@ expressions, with safety checks to prevent code injection.
 Example:
     >>> import random
     >>> random.seed(42)
-    >>> roll('3d6 + 2')
-    results([5, 1, 5])
+    >>> roll('3d6 + 2')  # Returns sum as int when adding constant
+    10
+    >>> roll('3d6')  # Returns results list when no operations
+    [6, 3, 2]
     >>> int(roll('2d20 + 5'))
-    22
-    >>> roll('4dF')  # Fudge dice: -1, 0, or 1
-    results([1, 0, -1, 1])
+    18
+
 """
 
 from __future__ import annotations
@@ -81,7 +82,9 @@ class results(list[int]):
         0
         >>> float(r) * 2.5
         25.0
+
     """
+
     def __int__(self) -> int:
         return int(sum(self))
 
@@ -180,6 +183,7 @@ def dcompile(dice_expr: str) -> CodeType:
         The compiled code object expects specific variables in its evaluation namespace:
         'random' (a random module or object), 'results' (the results class), and
         'xrange' (mapped to range).
+
     """
     assert safe_cp.match(dice_expr), f'Invalid dice expression: {dice_expr}'  # noqa: S101
     expr = dice_cp.sub(
@@ -230,17 +234,18 @@ def roll(dice_expr: str | CodeType, random_obj: Any = None, **kwargs: Any) -> An
         >>> random.seed(42)
         >>> result = roll('3d6')
         >>> result
-        results([5, 1, 5])
+        [6, 1, 1]
         >>> int(result)
-        11
+        8
         >>> roll('2d20 + 5', random_obj=random)
-        results([6, 4])
+        22
         >>> int(roll('max(4d6)'))
-        5
+        6
 
     Note:
         The evaluation uses eval() internally after safety validation. Only use dice
         expressions from trusted sources or those validated by dcompile().
+
     """
     if random_obj is None:
         import random

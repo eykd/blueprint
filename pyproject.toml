@@ -228,7 +228,7 @@ mark-parentheses = false
 # The best Python test runner
 # https://docs.pytest.org/en/latest/contents.html
 
-testpaths = ["tests/"]
+testpaths = ["tests/", "src/"]
 
 addopts = [
     "--cov",
@@ -236,6 +236,7 @@ addopts = [
     "--no-cov-on-fail",
     "--strict-markers",
     "--strict-config",
+    "--doctest-modules",
 ]
 
 markers = [

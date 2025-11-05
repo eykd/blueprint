@@ -20,14 +20,19 @@ class Mod(base.Blueprint):
     always return mastered items. An example::
 
         >>> import blueprint as bp
+        >>> class Item(bp.Blueprint):
+        ...     name = 'generic item'
+        ...     quality = bp.RandomInt(1, 6)
+        ...     value = 1
+
         >>> class Magical(bp.Mod):
         ...     name = bp.FormatTemplate('magical {meta.source.name}')
         ...     quality = lambda _: _.meta.source.quality * 1.2
         ...     value = bp.RandomInt(2, 10)
 
-        >>> item = Magical(Item)  # ``Item`` from example on ``blueprint.Blueprint``
+        >>> item = Magical(Item)
         >>> item.name
-        "magical generic item"
+        'magical generic item'
         >>> 1.2 <= item.quality <= (6*1.2)
         True
         >>> 2 <= item.value <= 10

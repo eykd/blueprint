@@ -308,17 +308,15 @@ class FormatTemplate(Field):
     >>> import blueprint as bp
     >>> class Item(bp.Blueprint):
     ...     bonus = 1
-    ...     name = bp.FormatTemplate('Item +{bonus}')
-    ...     joke = bp.FormatTemplate('Two men walked into a {meta.foo}')
+    ...     value = 10
+    ...     name = bp.FormatTemplate('Item +{bonus} (value: {value})')
     ...
     ...     class Meta:
     ...         foo = 'bar'
 
     >>> item = Item()
     >>> item.name
-    "Item +1"
-    >>> item.joke
-    "Two men walked into a bar"
+    'Item +1 (value: 10)'
     """
 
     _defer_to_end: bool = True

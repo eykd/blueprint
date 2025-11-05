@@ -301,8 +301,8 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
         ...     quality = bp.RandomInt(1, 6)
         ...     price = bp.depends_on('value', 'quality')(lambda _: _.value * _.quality)
 
-        >>> Item.tags
-        set(['Item', 'foo', 'bar', 'item'])
+        >>> sorted(Item.tags)
+        ['Item', 'bar', 'foo', 'item']
         >>> item = Item()  # Instantiate a "mastered" blueprint.
 
         >>> item.value
