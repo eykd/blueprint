@@ -1,0 +1,55 @@
+default_language_version:
+  python: python3.13
+repos:
+
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+    - id: trailing-whitespace
+    - id: end-of-file-fixer
+    - id: check-added-large-files
+    - id: check-merge-conflict
+    - id: mixed-line-ending
+
+- repo: local
+  hooks:
+    - id: uv-lock
+      name: uv-lock
+      entry: uv lock
+      language: system
+      pass_filenames: false
+      types_or:
+        - python
+        - toml
+
+    # Safe ruff check - avoid F401 conflicts with mypy
+    - id: ruff-check-safe
+      name: ruff-check-safe
+      entry: uv run ruff check --fix
+      language: system
+      types_or:
+        - python
+
+    - id: ruff-format
+      name: ruff-format
+      entry: uv run ruff format
+      language: system
+      types_or:
+        - python
+
+    - id: mypy-check
+      name: mypy-check
+      entry: uv run mypy src tests
+      pass_filenames: false
+      language: system
+      types_or:
+        - python
+
+    - id: pytest-check
+      name: pytest-check
+      entry: uv run pytest --random-order
+      language: system
+      pass_filenames: false
+      types_or:
+        - python
+        - toml
