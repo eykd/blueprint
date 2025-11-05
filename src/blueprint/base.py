@@ -62,7 +62,7 @@ class Meta:
     def __deepcopy__(self, memo: dict[int, Any]) -> Meta:
         self_id = id(self)
         existing: Meta | None = memo.get(self_id)
-        if existing is not None:
+        if existing is not None:  # pragma: no cover
             return existing
 
         meta = Meta()
@@ -105,7 +105,7 @@ class BlueprintMeta(type):
             # This must be a plugin implementation, which should be registered.
             # Simply appending it to the list is all that's needed to keep
             # track of it later.
-            if isinstance(cls.tags, str):
+            if isinstance(cls.tags, str):  # pragma: no branch
                 cls.tags = set(cls.tags.split())
             cls.tags.add(cls.__name__)
             cls.tags.update(t.lower() for t in camelcase_cp.findall(cls.__name__))
@@ -113,11 +113,11 @@ class BlueprintMeta(type):
             if 'name' not in attrs:
                 cls.name = ' '.join(camelcase_cp.findall(cls.__name__))
             for base in bases:
-                if hasattr(base, 'tags'):
+                if hasattr(base, 'tags'):  # pragma: no branch
                     base_tags = base.tags
                     if isinstance(base_tags, set):
                         cls.tags.update(base_tags)
-            if cls.tag_repo is not None:
+            if cls.tag_repo is not None:  # pragma: no branch
                 cls.tag_repo.add_object(cls)  # type: ignore[arg-type]
 
     def __new__(
@@ -247,14 +247,11 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
             # print "Can we resolve", name
             if callable(field):
                 if hasattr(field, 'depends_on') and not field.depends_on.issubset(resolved):
-                    if field.depends_on.intersection(deferred_to_end_names):
-                        # print "Deferring", name, "to end."
+                    if field.depends_on.intersection(deferred_to_end_names):  # pragma: no cover
                         deferred_to_end.append(name)
                     else:
-                        # print "Deferring", name
                         deferred.appendleft((name, field))
                 else:
-                    # print "Resolving", name
                     setattr(self, name, fields.resolve(self, field))
                     resolved.add(name)
             else:

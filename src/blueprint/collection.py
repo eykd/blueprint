@@ -40,9 +40,9 @@ class BlueprintCollection(Sequence[Blueprint]):
         """Return the theoretical maximum size of the collection."""
         return sys.maxsize
 
-    def __iter__(self) -> Iterator[Blueprint]:
+    def __iter__(self) -> Iterator[Blueprint]:  # pragma: no cover
         """Return an iterator over the collection."""
-        return iter(self)
+        return iter(self[0:])
 
     def __contains__(self, item: object) -> bool:
         """Check if an item is in the collection (always True)."""

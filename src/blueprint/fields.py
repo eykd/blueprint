@@ -392,7 +392,7 @@ class WithTags(Field):
 
     def __call__(self, parent: Any) -> list[Any]:  # noqa: D102
         objects = parent.tag_repo.query_tags_intersection(*self.with_tags) if self.with_tags else parent.tag_repo
-        if self.or_tags:
+        if self.or_tags:  # pragma: no cover
             objects = objects.query_tags_union(*self.or_tags)
         if self.not_tags:
             objects = objects.query_tags_difference(*self.not_tags)

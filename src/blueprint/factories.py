@@ -56,32 +56,16 @@ class Factory(base.Blueprint):
 
         return factory()
 
-    def __call__(
-        self,
-        parent: base.Blueprint | None = None,
-        *args: Any,  # noqa: ANN401
-        **kwargs: Any,  # noqa: ANN401
-    ) -> base.Blueprint:
+    def __call__(self) -> base.Blueprint:
         """Apply mods to the product and return the result.
-
-        Args:
-            parent: Optional parent blueprint for nested blueprint context.
-            *args: Additional positional arguments passed to product instantiation.
-            **kwargs: Additional keyword arguments passed to product instantiation.
 
         Returns:
             A mastered blueprint with all mods applied and factory fields transferred.
 
         """
-        product: type[base.Blueprint] | base.Blueprint = self.product
+        product: base.Blueprint = self.product
         for mod in self.mods:
             product = mod(product)
-
-        if isinstance(product, type):
-            # If the product isn't mastered yet, master it.
-            # Ensure parent is passed correctly by putting it in kwargs
-            call_kwargs = {**kwargs, 'parent': parent}
-            product = product(*args, **call_kwargs)
 
         for name in self.meta.fields:
             if name in {'product', 'mods'}:
