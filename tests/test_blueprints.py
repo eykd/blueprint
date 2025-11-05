@@ -72,7 +72,7 @@ class TestBlueprintSelection:
     ) -> None:
         """Should be able to query Weapon subclasses by tag."""
         repo = item.tag_repo
-        q = repo.queryTagsUnion('Weapon', 'primitive')
+        q = repo.query_tags_union('Weapon', 'primitive')
 
         assert spear in q
         assert pointed_stick in q
@@ -87,7 +87,7 @@ class TestBlueprintSelection:
     ) -> None:
         """Should be able to select a Weapon subclass by tag."""
         repo = item.tag_repo
-        q = repo.queryTagsUnion('Weapon', 'primitive')
+        q = repo.query_tags_union('Weapon', 'primitive')
 
         assert spear in q
         assert pointed_stick in q

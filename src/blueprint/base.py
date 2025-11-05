@@ -88,7 +88,7 @@ class BlueprintMeta(type):
             for base in bases:
                 if hasattr(base, 'tags'):
                     cls.tags.update(base.tags)
-            cls.tag_repo.addObject(cls)
+            cls.tag_repo.add_object(cls)
 
     def __new__(cls, name, bases, attrs):
         new = attrs.pop('__new__', None)

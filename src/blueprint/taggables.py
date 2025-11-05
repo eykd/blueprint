@@ -22,22 +22,22 @@ class AbstractTagSet:
     def __iter__(self):
         return iter(self.all())
 
-    def queryTagsIntersection(self, *tags):
+    def query_tags_intersection(self, *tags):
         objects = None
         for tag in resolve_tags(*tags):
-            tag_query = self.queryTag(tag)
+            tag_query = self.query_tag(tag)
             if objects is None:
                 objects = tag_query
             objects.intersection_update(tag_query)
         return objects
 
-    def queryTagsUnion(self, *tags):
+    def query_tags_union(self, *tags):
         objs = TagSet()
         for tag in resolve_tags(*tags):
-            objs.update(self.queryTag(tag))
+            objs.update(self.query_tag(tag))
         return objs
 
-    def queryTagsDifference(self, *tags):
+    def query_tags_difference(self, *tags):
         objs = TagSet(self.all())
         for tag in resolve_tags(*tags):
             for obj in list(objs):
@@ -47,11 +47,11 @@ class AbstractTagSet:
         return objs
 
     def query(self, with_tags=(), or_tags=(), not_tags=()):
-        objects = self.queryTagsIntersection(*with_tags) if with_tags else self.all()
+        objects = self.query_tags_intersection(*with_tags) if with_tags else self.all()
         if or_tags:
-            objects = objects.queryTagsUnion(*or_tags)
+            objects = objects.query_tags_union(*or_tags)
         if not_tags:
-            objects = objects.queryTagsDifference(*not_tags)
+            objects = objects.query_tags_difference(*not_tags)
 
         return objects
 
@@ -80,9 +80,9 @@ class AbstractTagSet:
         or_tags = resolve_tags(*or_tags)
         not_tags = resolve_tags(*not_tags)
 
-        objects = self.queryTagsIntersection(*with_tags)
+        objects = self.query_tags_intersection(*with_tags)
         if not_tags:
-            objects = objects.queryTagsDifference(*not_tags)
+            objects = objects.query_tags_difference(*not_tags)
 
         rankings = []
         for obj in objects:
@@ -94,7 +94,7 @@ class AbstractTagSet:
                     rank -= 1
             rankings.append(rank)
         # Python 3 zip is an iterator, ergo no itertools.izip available.)
-        ranks_objs = sorted(getattr(itertools, 'izip', zip)(rankings, objects), reverse=True, key=operator.itemgetter(0))
+        ranks_objs = sorted(zip(rankings, objects), reverse=True, key=operator.itemgetter(0))
         toprank = ranks_objs[0][0]
         how_many = rankings.count(toprank)
         top_contenders = [robj[1] for robj in ranks_objs[:how_many]]
@@ -131,17 +131,17 @@ class Taggable:
     @tag_repo.setter
     def tag_repo(self, repo) -> None:
         if self._tag_repo is not None and repo is not self._tag_repo:
-            self._tag_repo.removeObject(self)
+            self._tag_repo.remove_object(self)
 
         if repo is not None and repo is not self._tag_repo:
-            repo.addObject(self, check_repo=False)
+            repo.add_object(self, check_repo=False)
 
         self._tag_repo = repo
 
-    def addTag(self, *tags) -> None:
-        self.tag_repo.tagObject(self, *tags)
+    def add_tag(self, *tags) -> None:
+        self.tag_repo.tag_object(self, *tags)
 
-    def removeTag(self, *tags) -> None:
+    def remove_tag(self, *tags) -> None:
         self.tag_repo.untagObject(self, *tags)
 
     def __cmp__(self, other):
@@ -158,12 +158,12 @@ class TaggableClass:
     """
 
     @classmethod
-    def addTag(cls, *tags) -> None:
-        cls.tag_repo.tagObject(cls, *tags)
+    def add_tag(cls, *tags) -> None:
+        cls.tag_repo.tag_object(cls, *tags)
 
     @classmethod
-    def removeTag(cls, *tags) -> None:
-        cls.tag_repo.untagObject(cls, *tags)
+    def remove_tag(cls, *tags) -> None:
+        cls.tag_repo.untag_object(cls, *tags)
 
     last_picked = 0.0
 
@@ -173,9 +173,9 @@ class TagRepository(AbstractTagSet):
 
     def __init__(self, *objs) -> None:
         self.tag_objs = defaultdict(TagSet)
-        self.addObject(*objs)
+        self.add_object(*objs)
 
-    def addObject(self, *objs, **kwargs) -> None:
+    def add_object(self, *objs, **kwargs) -> None:
         for obj in objs:
             if kwargs.get('check_repo', True) and obj.tag_repo is not self:
                 obj.tag_repo = self
@@ -183,24 +183,24 @@ class TagRepository(AbstractTagSet):
                 for tag in resolve_tags(*obj.tags):
                     self.tag_objs[tag].add(obj)
 
-    def removeObject(self, *objs) -> None:
+    def remove_object(self, *objs) -> None:
         for obj in objs:
             for tag in resolve_tags(*obj.tags):
                 with contextlib.suppress(KeyError):
                     self.tag_objs[tag].remove(obj)
 
-    def addTags(self, *tags) -> None:
+    def add_tags(self, *tags) -> None:
         """Add tags to the db."""
         for tag in resolve_tags(*tags):
             self.tag_objs[tag]
 
-    def tagObject(self, obj, *tags) -> None:
+    def tag_object(self, obj, *tags) -> None:
         """Tag an object."""
         for tag in resolve_tags(*tags):
             self.tag_objs[tag].add(obj)
         obj.tags.update(tags)
 
-    def untagObject(self, obj, *tags) -> None:
+    def untag_object(self, obj, *tags) -> None:
         """Untag an object."""
         for tag in resolve_tags(*tags):
             with contextlib.suppress(KeyError):
@@ -211,7 +211,7 @@ class TagRepository(AbstractTagSet):
         """Return the set of all objects in the repository."""
         return TagSet(itertools.chain.from_iterable(self.tag_objs.values()))
 
-    def queryTag(self, tag):
+    def query_tag(self, tag):
         """Return the set of objects referenced by the given tag."""
         return TagSet(self.tag_objs[tag])
 
@@ -226,7 +226,7 @@ class TagSet(set, AbstractTagSet):
     def all(self):
         return self
 
-    def queryTag(self, tag):
+    def query_tag(self, tag):
         """Return all objects in the set that have the given tag."""
         objs = TagSet()
         for obj in self:

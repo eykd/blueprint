@@ -359,11 +359,11 @@ class WithTags(Field):
                 self.with_tags.add(t)
 
     def __call__(self, parent):
-        objects = parent.tag_repo.queryTagsIntersection(*self.with_tags) if self.with_tags else parent.tag_repo
+        objects = parent.tag_repo.query_tags_intersection(*self.with_tags) if self.with_tags else parent.tag_repo
         if self.or_tags:
-            objects = objects.queryTagsUnion(*self.or_tags)
+            objects = objects.query_tags_union(*self.or_tags)
         if self.not_tags:
-            objects = objects.queryTagsDifference(*self.not_tags)
+            objects = objects.query_tags_difference(*self.not_tags)
 
         return [o for o in objects if not o.meta.abstract]
 

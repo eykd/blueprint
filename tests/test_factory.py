@@ -3,6 +3,8 @@
 Converted from features/factory.feature
 """
 
+from typing import ClassVar
+
 import blueprint
 
 
@@ -19,7 +21,7 @@ def test_factory_produces_magical_weapon(
 
     class MagicalItemFactory(blueprint.Factory):
         product = blueprint.PickFrom(blueprint.WithTags('weapon'))
-        mods = [magical_item_prefix, of_doom]
+        mods: ClassVar[list[type[blueprint.Mod]]] = [magical_item_prefix, of_doom]
 
     item = MagicalItemFactory()
 
