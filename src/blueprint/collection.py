@@ -53,9 +53,9 @@ class BlueprintCollection(Sequence[Blueprint]):
 
     Example:
         >>> from blueprint.base import Blueprint
-        >>> class Weapon(Blueprint):
+        >>> class Sword(Blueprint):
         ...     damage = 10
-        >>> weapons = BlueprintCollection(Weapon, seed='weapon')
+        >>> weapons = BlueprintCollection(Sword, seed='weapon')
         >>> weapons[0].damage
         10
         >>> weapons[5].damage
@@ -184,10 +184,10 @@ class BlueprintCollection(Sequence[Blueprint]):
 
         Example:
             >>> from blueprint.base import Blueprint
-            >>> class Weapon(Blueprint):
+            >>> class Sword(Blueprint):
             ...     name = 'sword'
             ...     damage = 10
-            >>> weapons = BlueprintCollection(Weapon, seed='weapon', damage=15)
+            >>> weapons = BlueprintCollection(Sword, seed='weapon', damage=15)
             >>> # Use collection defaults
             >>> w1 = weapons()
             >>> w1.damage

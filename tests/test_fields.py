@@ -420,8 +420,8 @@ class TestWithTags:
             tags = 'foo bar'  # type: ignore[assignment]
             value = 1
 
-        class Weapon(Item):
-            tags = 'dangerous'
+        class SuperItem(Item):
+            tags = 'super item'
             damage = 5
 
         class Container(blueprint.Blueprint):
