@@ -1,5 +1,5 @@
-"""blueprint.base -- base metaclasses and other junk for blueprints.
-"""
+"""blueprint.base -- base metaclasses and other junk for blueprints."""
+
 import copy
 import random
 import re
@@ -66,8 +66,7 @@ camelcase_cp = re.compile(r'[A-Z][^A-Z]+')
 
 
 class BlueprintMeta(type):
-    """Metaclass for blueprints. Handles the declarative magic.
-    """
+    """Metaclass for blueprints. Handles the declarative magic."""
 
     def __init__(cls, name, bases, attrs):
         if not hasattr(cls, 'tag_repo'):
@@ -130,16 +129,10 @@ class BlueprintMeta(type):
         return '<%s:\n    %s\n    >' % (
             cls.__name__,
             '\n    '.join(
-                '%s -- %s' % (
-                    n,
-                    '\n'.join(
-                        '    %s' % i
-                        for i in repr(getattr(cls, n)).splitlines()
-                        ).strip()
-                    )
+                '%s -- %s' % (n, '\n'.join('    %s' % i for i in repr(getattr(cls, n)).splitlines()).strip())
                 for n in sorted(cls.meta.fields)
-                )
-            )
+            ),
+        )
 
 
 class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
@@ -153,7 +146,7 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
     Example::
 
         >>> import blueprint as bp
-        
+
         >>> class Item(bp.Blueprint):
         ...     # Tags are space-separated
         ...     tags = 'foo bar'
@@ -167,7 +160,7 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
         >>> Item.tags
         set(['Item', 'foo', 'bar', 'item'])
         >>> item = Item()  # Instantiate a "mastered" blueprint.
-        
+
         >>> item.value
         1
         >>> 1 <= item.quality <= 6
@@ -178,16 +171,10 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
         return '<%s:\n    %s\n    >' % (
             self.__class__.__name__,
             '\n    '.join(
-                '%s -- %s' % (
-                    n,
-                    '\n'.join(
-                        '    %s' % i
-                        for i in repr(getattr(self, n)).splitlines()
-                        ).strip()
-                    )
+                '%s -- %s' % (n, '\n'.join('    %s' % i for i in repr(getattr(self, n)).splitlines()).strip())
                 for n in sorted(self.meta.fields)
-                )
-            )
+            ),
+        )
 
     def __init__(self, parent=None, seed=None, **kwargs):
         self.meta = copy.deepcopy(self.meta)

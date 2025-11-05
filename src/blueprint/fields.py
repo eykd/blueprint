@@ -1,5 +1,5 @@
-"""blueprint.fields
-"""
+"""blueprint.fields"""
+
 import inspect
 import operator
 import pprint
@@ -38,8 +38,7 @@ class Field:
 
     Subclasses of ``Field`` should define a ``__call__`` method::
 
-        def __call__(self, parent):
-            ...
+        def __call__(self, parent): ...
 
     ``__call__`` should return the final, resolved value of the field.
 
@@ -89,8 +88,7 @@ class Field:
 
 
 class _Operator(Field):
-    """Base class for all operator fields.
-    """
+    """Base class for all operator fields."""
 
     op = None
     sym = ''
@@ -120,48 +118,42 @@ class _Operator(Field):
 
 
 class Add(_Operator):
-    """When resolved, adds all the provided arguments and returns the result.
-    """
+    """When resolved, adds all the provided arguments and returns the result."""
 
     op = operator.add
     sym = '+'
 
 
 class Subtract(_Operator):
-    """When resolved, subtracts all the provided arguments and returns the result.
-    """
+    """When resolved, subtracts all the provided arguments and returns the result."""
 
     op = operator.sub
     sym = '-'
 
 
 class Multiply(_Operator):
-    """When resolved, multiplies all the provided arguments and returns the result.
-    """
+    """When resolved, multiplies all the provided arguments and returns the result."""
 
     op = operator.mul
     sym = '*'
 
 
 class Divide(_Operator):
-    """When resolved, divides all the provided arguments and returns the result.
-    """
+    """When resolved, divides all the provided arguments and returns the result."""
 
     op = operator.truediv
     sym = '/'
 
 
 class FloorDivide(_Operator):
-    """When resolved, divides-with-truncation all the provided arguments and returns the result.
-    """
+    """When resolved, divides-with-truncation all the provided arguments and returns the result."""
 
     op = operator.floordiv
     sym = '//'
 
 
 class RandomInt(Field):
-    """When resolved, returns a random integer between ``start`` and ``end``.
-    """
+    """When resolved, returns a random integer between ``start`` and ``end``."""
 
     def __init__(self, start, end):
         self.start = start
@@ -244,8 +236,7 @@ class DiceTable(Dice):
 
 
 class PickOne(Field):
-    """When resolved, returns a random item from the arguments provided.
-    """
+    """When resolved, returns a random item from the arguments provided."""
 
     def __init__(self, *choices):
         self.choices = choices
@@ -259,8 +250,7 @@ class PickOne(Field):
 
 
 class PickFrom(Field):
-    """When resolved, returns a random item from the collection provided.
-    """
+    """When resolved, returns a random item from the collection provided."""
 
     def __init__(self, collection):
         self.collection = collection
@@ -274,8 +264,7 @@ class PickFrom(Field):
 
 
 class All(Field):
-    """When resolved, returns a list of the provided items, themselves resolved.
-    """
+    """When resolved, returns a list of the provided items, themselves resolved."""
 
     def __init__(self, *items):
         self.items = items
@@ -292,7 +281,7 @@ class FormatTemplate(Field):
 
     Uses the Python `format string syntax`_. All other fields are
     available to the template, as well as the parent ``meta`` options
-    object. 
+    object.
 
     .. format string syntax: http://docs.python.org/library/string.html#formatstrings
 
@@ -326,8 +315,7 @@ class FormatTemplate(Field):
         if parent is None:
             return self
 
-        fields = {'meta': parent.meta,
-                  'parent': parent}
+        fields = {'meta': parent.meta, 'parent': parent}
         for name in parent.meta.fields:
             if getattr(parent.__class__, name) is not self:
                 fields[name] = getattr(parent, name)
@@ -398,8 +386,7 @@ def generator(func):
 
 
 def depends_on(*names):
-    """Declare that the given method depends upon other members to be resolved first.
-    """
+    """Declare that the given method depends upon other members to be resolved first."""
     dependencies = set()
     for name in names:
         dependencies.update(name.split())
@@ -412,8 +399,7 @@ def depends_on(*names):
 
 
 def resolve(parent, field):
-    """Resolve a field with the given parent instance.
-    """
+    """Resolve a field with the given parent instance."""
     while callable(field):
         if inspect.ismethod(field):
             try:

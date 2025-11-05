@@ -2,6 +2,7 @@
 
 Converted from features/dice.feature
 """
+
 import pytest
 
 
@@ -20,7 +21,7 @@ import pytest
         '2d6',
         '1dF',
         '2dF',
-    ]
+    ],
 )
 def test_dice_rolling(dice_expr, min_sum, max_sum, min_roll, max_roll):
     """Test rolling dice with various expressions.

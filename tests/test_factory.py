@@ -2,6 +2,7 @@
 
 Converted from features/factory.feature
 """
+
 import blueprint
 
 

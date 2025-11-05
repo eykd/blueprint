@@ -1,5 +1,5 @@
-"""blueprint.taggables -- tag repositories and query interface for selecting contained items.
-"""
+"""blueprint.taggables -- tag repositories and query interface for selecting contained items."""
+
 import itertools
 import time
 from collections import defaultdict
@@ -15,8 +15,7 @@ def resolve_tags(*tags):
 
 
 class AbstractTagSet:
-    """Define methods for interacting with a local tag set.
-    """
+    """Define methods for interacting with a local tag set."""
 
     def __iter__(self):
         return iter(self.all())
@@ -25,7 +24,8 @@ class AbstractTagSet:
         objects = None
         for tag in resolve_tags(*tags):
             tag_query = self.queryTag(tag)
-            if objects is None: objects = tag_query
+            if objects is None:
+                objects = tag_query
             objects.intersection_update(tag_query)
         return objects
 
@@ -113,8 +113,7 @@ class AbstractTagSet:
 
 
 class Taggable:
-    """A taggable object.
-    """
+    """A taggable object."""
 
     def __init__(self, tag_repo, *tags):
         super(Taggable, self).__init__()
@@ -171,8 +170,7 @@ class TaggableClass:
 
 
 class TagRepository(AbstractTagSet):
-    """An example implementation for storing and querying tags.
-    """
+    """An example implementation for storing and querying tags."""
 
     def __init__(self, *objs):
         self.tag_objs = defaultdict(TagSet)
@@ -195,21 +193,18 @@ class TagRepository(AbstractTagSet):
                     pass
 
     def addTags(self, *tags):
-        """Add tags to the db.
-        """
+        """Add tags to the db."""
         for tag in resolve_tags(*tags):
             self.tag_objs[tag]
 
     def tagObject(self, obj, *tags):
-        """Tag an object.
-        """
+        """Tag an object."""
         for tag in resolve_tags(*tags):
             self.tag_objs[tag].add(obj)
         obj.tags.update(tags)
 
     def untagObject(self, obj, *tags):
-        """Untag an object.
-        """
+        """Untag an object."""
         for tag in resolve_tags(*tags):
             try:
                 self.tag_objs[tag].remove(obj)
@@ -218,13 +213,11 @@ class TagRepository(AbstractTagSet):
         obj.tags.difference_update(tags)
 
     def all(self):
-        """Return the set of all objects in the repository.
-        """
+        """Return the set of all objects in the repository."""
         return TagSet(itertools.chain.from_iterable(self.tag_objs.values()))
 
     def queryTag(self, tag):
-        """Return the set of objects referenced by the given tag.
-        """
+        """Return the set of objects referenced by the given tag."""
         return TagSet(self.tag_objs[tag])
 
 
@@ -239,8 +232,7 @@ class TagSet(set, AbstractTagSet):
         return self
 
     def queryTag(self, tag):
-        """Return all objects in the set that have the given tag.
-        """
+        """Return all objects in the set that have the given tag."""
         objs = TagSet()
         for obj in self:
             if tag in obj.tags:

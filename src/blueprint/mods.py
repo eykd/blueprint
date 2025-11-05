@@ -1,5 +1,5 @@
-"""blueprint.mods -- blueprint modifiers.
-"""
+"""blueprint.mods -- blueprint modifiers."""
+
 import copy
 
 from . import base

@@ -1,5 +1,4 @@
-"""blueprint.factories -- blueprint factories.
-"""
+"""blueprint.factories -- blueprint factories."""
 
 from . import base
 
@@ -30,10 +29,10 @@ class Factory(base.Blueprint):
         factory = super(Factory, cls).__new__(cls, *args, **kwargs)
         factory.__init__(*args, **kwargs)
 
-        if not isinstance(factory.product, base.Blueprint) \
-               and not isinstance(factory.product, base.BlueprintMeta):
-            raise TypeError('The `Factory.product` field must resolve to a single blueprint when mastered.\n%r'
-                            % factory.product)
+        if not isinstance(factory.product, base.Blueprint) and not isinstance(factory.product, base.BlueprintMeta):
+            raise TypeError(
+                'The `Factory.product` field must resolve to a single blueprint when mastered.\n%r' % factory.product
+            )
 
         return factory()
 

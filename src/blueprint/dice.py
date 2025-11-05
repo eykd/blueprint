@@ -1,5 +1,5 @@
-"""blueprint.dice -- a magic bag of dice.
-"""
+"""blueprint.dice -- a magic bag of dice."""
+
 import re
 
 __all__ = ['dcompile', 'roll']
@@ -14,7 +14,8 @@ except NameError:
 dice_cp = re.compile(r'(?P<num>\d+)d(?P<sides>\d+)')
 fudge_cp = re.compile(r'(?P<num>\d+)d[fF]')
 
-safe_cp = re.compile(r"""
+safe_cp = re.compile(
+    r"""
 ^(?:
     \d+d\d+  # Dice expression
   | \d+d[Ff] # Fudge dice
@@ -30,7 +31,9 @@ safe_cp = re.compile(r"""
   | [+-/*%]
   | \s
 )+$
-""", re.VERBOSE)
+""",
+    re.VERBOSE,
+)
 
 
 class results(list):
@@ -101,12 +104,18 @@ def dcompile(dice_expr):
     ``eval``.
     """
     assert safe_cp.match(dice_expr), 'Invalid dice expression: %s' % dice_expr
-    expr = dice_cp.sub(r'results(random.randint(1, \g<sides>) '
-                       r'for x in xrange(\g<num>))',
-                       dice_expr)
-    expr = fudge_cp.sub(('results(random.choice([-1, -1, 0, 0, 1, 1]) '
-                         r'for x in xrange(\g<num>))'),
-                        expr)
+    expr = dice_cp.sub(
+        r'results(random.randint(1, \g<sides>) '
+        r'for x in xrange(\g<num>))',
+        dice_expr,
+    )
+    expr = fudge_cp.sub(
+        (
+            'results(random.choice([-1, -1, 0, 0, 1, 1]) '
+            r'for x in xrange(\g<num>))'
+        ),
+        expr,
+    )
     return compile(expr, 'dice_expression: (%s)' % dice_expr, 'eval')
 
 
@@ -118,6 +127,7 @@ def roll(dice_expr, random_obj=None, **kwargs):
     """
     if random_obj is None:
         import random
+
         random_obj = random
     if isinstance(dice_expr, basestring):
         dice_expr = dcompile(dice_expr)

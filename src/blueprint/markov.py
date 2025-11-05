@@ -1,5 +1,5 @@
-"""blueprint.markov -- Markov Chain generator.
-"""
+"""blueprint.markov -- Markov Chain generator."""
+
 import collections
 from collections.abc import Mapping
 
@@ -46,12 +46,11 @@ class MarkovChain(fields.Field, Mapping):
             spacer = ''.join((' ' * chainlen, name))
             name_len = len(name)
             for num in xrange(name_len):
-                self.add_key(spacer[num:num + chainlen], spacer[num + chainlen])
-            self.add_key(spacer[name_len:name_len + chainlen], '\n')
+                self.add_key(spacer[num : num + chainlen], spacer[num + chainlen])
+            self.add_key(spacer[name_len : name_len + chainlen], '\n')
 
     def getRandomName(self, parent):
-        """Return a random name.
-        """
+        """Return a random name."""
         prefix = ' ' * self.chainlen
         name = ''
         suffix = ''
