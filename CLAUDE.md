@@ -8,6 +8,11 @@ Blueprint is a procedural generation library for Python that implements a "magic
 
 **Key Concept**: Think of Blueprints as templates that generate concrete data objects. When you instantiate a Blueprint subclass, all dynamic fields are resolved to produce a "mastered" blueprint with final values.
 
+### Quality Requirements
+- All code is now fully type-annotated (mypy strict mode)
+- Comprehensive linting rules enforced (ruff)
+- 100% test coverage required
+
 ## Core Architecture
 
 The codebase follows a metaclass-driven design with these key components:
@@ -54,16 +59,34 @@ The codebase follows a metaclass-driven design with these key components:
 
 ## Development Commands
 
+### Initial Setup
+```bash
+# Install dependencies (dev + test)
+uv sync --group dev --group test
+
+# Install pre-commit hooks
+uv run pre-commit install
+```
+
 ### Testing
 ```bash
-# Run pytest tests
+# Run all checks (format, lint, type-check, test)
+./runtests.sh
+
+# Run pytest with coverage
 uv run pytest
 
-# Run a single test file
-uv run pytest tests/test_specific.py
+# Run tests with randomized order (validates test independence)
+uv run pytest --random-order
 
-# Run doctests in source files
-uv run python -m doctest src/blueprint/base.py
+# Run tests with 100% coverage requirement (CI mode)
+uv run pytest --cov-fail-under=100
+
+# Run a single test file
+uv run pytest tests/test_base.py
+
+# Run only fast tests (exclude slow tests)
+uv run pytest -m "not slow"
 ```
 
 ### Code Quality
@@ -71,23 +94,17 @@ uv run python -m doctest src/blueprint/base.py
 # Run ruff linter
 uv run ruff check .
 
+# Auto-fix linting issues
+uv run ruff check --fix .
+
 # Run ruff formatter
 uv run ruff format .
 
-# Run type checker
-uv run mypy src/
+# Run type checker on source and tests
+uv run mypy src tests
 
-# Fix auto-fixable linting issues
-uv run ruff check --fix .
-```
-
-### Development Workflow
-```bash
-# Install dependencies
-uv sync
-
-# Install with dev dependencies
-uv sync --group dev --group test
+# Run pre-commit hooks manually (all files)
+uv run pre-commit run --all-files
 ```
 
 ## Important Patterns & Conventions
@@ -118,15 +135,67 @@ weapon = blueprint.PickFrom(blueprint.WithTags('pointed weapon'))
 - Indirect descendants share ancestor's repository
 - `Meta.abstract = True` prevents blueprint from being added to tag repository
 
-## Code Style Notes
+## Code Quality Standards
 
-- **Python version**: 3.11+
-- **Type hints**: Adding type hints is encouraged (mypy strict mode enabled)
-- **Formatting**: Ruff with single quotes for inline strings, double quotes for docstrings
+This codebase maintains **100% test coverage** and enforces strict quality standards through automated tooling:
+
+### Python Version & Type Safety
+- **Python version**: 3.11+ (Python 2.7 support dropped as of v0.7.0)
+- **Type hints**: Fully typed with mypy strict mode enabled across all modules
+- **Type checking**: `uv run mypy src tests` validates all code
+- **py.typed marker**: Package includes type information for downstream consumers
+
+### Code Formatting & Linting
+- **Formatter**: Ruff with single quotes for inline strings, double quotes for docstrings
 - **Line length**: 120 characters
-- **Imports**: Use ruff's isort integration (profile = "black")
-- **Docstrings**: Google-style docstrings with examples (many modules have extensive doctests)
+- **Linter**: Comprehensive ruff configuration with 50+ rule groups enabled
+- **Import sorting**: Ruff's isort integration (profile = "black")
+- **Docstrings**: Google-style docstrings with executable examples
 
-## Testing Strategy
+### Testing Infrastructure
+- **Framework**: pytest with 100% coverage requirement (enforced in CI)
+- **Test execution**:
+  - `uv run pytest` - runs all tests with coverage
+  - `./runtests.sh` - development test script with auto-formatting
+  - `uv run pytest --random-order` - validates test independence
+- **Test types**:
+  - Unit tests in `tests/` directory (one test file per module)
+  - Doctests embedded in all source modules
+  - Hypothesis-based property testing where applicable
+- **Coverage**: Branch coverage enabled, 100% required for CI to pass
 
-- **pytest**: Configured but test directory not yet created (pytest.ini points to `tests/`)
+### Continuous Integration
+- **GitHub Actions**: Automated testing on Python 3.11, 3.12, and 3.13
+- **Pre-commit hooks**: Auto-format, lint, type-check, and test before commit
+- **Quality gates**: All checks must pass (tests, coverage, linting, type checking)
+
+## Development Practices
+
+When working on this codebase:
+
+1. **Run tests before commits**: Use `./runtests.sh` to validate all changes locally
+2. **Pre-commit hooks are mandatory**: They catch issues before they reach CI
+3. **100% coverage is required**: All new code must include comprehensive tests
+4. **Type annotations are required**: Add type hints for all functions, methods, and variables
+5. **Docstrings with examples**: Include Google-style docstrings with doctests where applicable
+6. **Test independence**: Tests must pass regardless of execution order (validated by pytest-random-order)
+
+### Adding New Features
+
+When adding new functionality:
+
+1. Write tests first or alongside implementation (TDD approach)
+2. Add type annotations from the start
+3. Include doctests in docstrings for user-facing APIs
+4. Ensure 100% coverage for your changes
+5. Run the full test suite with `./runtests.sh` before committing
+
+### Modifying Existing Code
+
+When changing existing code:
+
+1. Verify existing tests still pass
+2. Update or add tests to cover your changes
+3. Maintain 100% coverage (no regression)
+4. Update docstrings and doctests if behavior changes
+5. Run type checker to ensure no type safety regressions
