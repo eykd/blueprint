@@ -26,6 +26,6 @@ def test_factory_produces_magical_weapon(
     item = MagicalItemFactory()
 
     # TODO: item is *sometimes* a subclass of a Doppelganger Weapon.
-    # assert isinstance(item, weapon)  # noqa: ERA001
+    # assert isinstance(item, weapon)
     assert item.name.endswith('of DOOM')
     assert item.damage >= 20, f'Expected damage >= 20, got {item.damage} for {item}'

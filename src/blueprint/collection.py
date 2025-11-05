@@ -49,7 +49,10 @@ class BlueprintCollection(Sequence[Blueprint]):
         return True
 
     def __call__(
-        self, parent: Blueprint | None = None, seed: str | None = None, **kwargs: Any  # noqa: ANN401
+        self,
+        parent: Blueprint | None = None,
+        seed: str | None = None,
+        **kwargs: Any,  # noqa: ANN401
     ) -> Blueprint:
         """Generate a blueprint instance with the given parameters.
 
