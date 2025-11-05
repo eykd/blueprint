@@ -203,11 +203,11 @@ class Dice(Field):
 
     def __init__(self, dice_expr: str, **local_kwargs: Any) -> None:
         self.expr = dice_expr
-        self.compiled_expr = dice.dcompile(dice_expr)  # type: ignore[no-untyped-call]
+        self.compiled_expr = dice.dcompile(dice_expr)
         self.local_kwargs = local_kwargs
 
     def __call__(self, parent: Any) -> Any:  # noqa: D102
-        return dice.roll(self.compiled_expr, random_obj=parent.meta.random, parent=parent, **self.local_kwargs)  # type: ignore[no-untyped-call]
+        return dice.roll(self.compiled_expr, random_obj=parent.meta.random, parent=parent, **self.local_kwargs)
 
     def __str__(self) -> str:
         return str(self.expr)

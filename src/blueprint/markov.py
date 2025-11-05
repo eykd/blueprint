@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import collections
 from collections.abc import Iterable, Iterator, Mapping
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from blueprint import fields
 
@@ -125,4 +125,4 @@ class MarkovChain(fields.Field, Mapping[str, list[str]]):
             A randomly selected suffix character associated with the prefix.
 
         """
-        return cast('str', parent.meta.random.choice(self[prefix]))
+        return parent.meta.random.choice(self[prefix])

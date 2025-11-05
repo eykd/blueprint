@@ -18,5 +18,5 @@ def test_mod_creates_modified_blueprint(club: type[blueprint.Blueprint], of_doom
     club_instance = of_doom(club)
 
     assert isinstance(club_instance, club)
-    assert club_instance.name == 'Big Club of DOOM'
-    assert club_instance.damage >= 200, f'Expected damage >= 200, got {club_instance.damage}'
+    assert club_instance.name == 'Big Club of DOOM'  # type: ignore[attr-defined]
+    assert club_instance.damage >= 200, f'Expected damage >= 200, got {club_instance.damage}'  # type: ignore[attr-defined]

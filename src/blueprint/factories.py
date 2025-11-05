@@ -26,7 +26,7 @@ class Factory(base.Blueprint):
     Calling a factory will return the product with mods applied.
     """
 
-    product: ClassVar[type[base.Blueprint] | base.Blueprint | None] = None
+    product: ClassVar[Any] = None
     mods: ClassVar[Sequence[Any]] = []
 
     def __new__(cls, *args: Any, **kwargs: Any) -> base.Blueprint:  # type: ignore[misc]  # noqa: ANN401
@@ -73,7 +73,7 @@ class Factory(base.Blueprint):
             A mastered blueprint with all mods applied and factory fields transferred.
 
         """
-        product: type[base.Blueprint] | base.Blueprint = self.product  # type: ignore[assignment]
+        product: type[base.Blueprint] | base.Blueprint = self.product
         for mod in self.mods:
             product = mod(product)
 

@@ -72,11 +72,12 @@ class TestBlueprintSelection:
     ) -> None:
         """Should be able to query Weapon subclasses by tag."""
         repo = item.tag_repo
+        assert repo is not None
         q = repo.query_tags_union('Weapon', 'primitive')
 
-        assert spear in q
-        assert pointed_stick in q
-        assert club in q
+        assert spear in q  # type: ignore[comparison-overlap]
+        assert pointed_stick in q  # type: ignore[comparison-overlap]
+        assert club in q  # type: ignore[comparison-overlap]
 
     def test_select_weapon_subclass_by_tag(
         self,
@@ -87,15 +88,16 @@ class TestBlueprintSelection:
     ) -> None:
         """Should be able to select a Weapon subclass by tag."""
         repo = item.tag_repo
+        assert repo is not None
         q = repo.query_tags_union('Weapon', 'primitive')
 
-        assert spear in q
-        assert pointed_stick in q
-        assert club in q
+        assert spear in q  # type: ignore[comparison-overlap]
+        assert pointed_stick in q  # type: ignore[comparison-overlap]
+        assert club in q  # type: ignore[comparison-overlap]
 
         old_weapon = None
         for _ in range(10):
             weapon = repo.select(with_tags=('Weapon', 'primitive'))
-            assert weapon in {spear, pointed_stick, club}
+            assert weapon in {spear, pointed_stick, club}  # type: ignore[comparison-overlap]
             assert weapon is not old_weapon
             old_weapon = weapon

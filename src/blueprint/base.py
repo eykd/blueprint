@@ -1,10 +1,12 @@
 """blueprint.base -- base metaclasses and other junk for blueprints."""
 
+from __future__ import annotations
+
 import copy
 import random
 import re
 from collections import deque
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -40,10 +42,10 @@ class Meta:
     fields: set[str]
     mastered: bool
     abstract: bool
-    source: Optional['Blueprint']
-    parent: Optional['Blueprint']
+    source: type[Blueprint] | Blueprint | None
+    parent: Blueprint | None
     random: random.Random
-    seed: float
+    seed: str | float
     kwargs: dict[str, Any]
 
     def __init__(self) -> None:
@@ -57,7 +59,7 @@ class Meta:
         self.seed = random.random()  # noqa: S311
         self.random.seed(self.seed)
 
-    def __deepcopy__(self, memo: dict[int, Any]) -> 'Meta':
+    def __deepcopy__(self, memo: dict[int, Any]) -> Meta:
         self_id = id(self)
         existing: Meta | None = memo.get(self_id)
         if existing is not None:
@@ -119,11 +121,11 @@ class BlueprintMeta(type):
                 cls.tag_repo.add_object(cls)  # type: ignore[arg-type]
 
     def __new__(
-        cls: type['BlueprintMeta'],
+        cls: type[BlueprintMeta],
         name: str,
         bases: tuple[type, ...],
         attrs: dict[str, Any],
-    ) -> 'BlueprintMeta':
+    ) -> BlueprintMeta:
         new = attrs.pop('__new__', None)
         classcell = attrs.pop('__classcell__', None)
         new_attrs: dict[str, Any] = {}
@@ -213,8 +215,8 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
 
     def __init__(
         self,
-        parent: Optional['Blueprint'] = None,
-        seed: float | None = None,
+        parent: Blueprint | None = None,
+        seed: str | float | None = None,
         **kwargs: Any,  # noqa: ANN401
     ) -> None:
         self.meta = copy.deepcopy(self.meta)
