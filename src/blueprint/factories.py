@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """blueprint.factories -- blueprint factories.
 """
+
 from . import base
-import copy
 
 __all__ = ['Factory']
 
@@ -20,9 +19,10 @@ class Factory(base.Blueprint):
 
     Calling a factory will return the product with mods applied.
     """
+
     product = None
     mods = []
-    
+
     def __new__(cls, *args, **kwargs):
         if cls.product is None:
             raise ValueError('Factory subclasses must define a `product` field in order to be used.')
@@ -32,7 +32,7 @@ class Factory(base.Blueprint):
 
         if not isinstance(factory.product, base.Blueprint) \
                and not isinstance(factory.product, base.BlueprintMeta):
-            raise TypeError('The `Factory.product` field must resolve to a single blueprint when mastered.\n%r' \
+            raise TypeError('The `Factory.product` field must resolve to a single blueprint when mastered.\n%r'
                             % factory.product)
 
         return factory()
@@ -41,7 +41,7 @@ class Factory(base.Blueprint):
         product = self.product
         for mod in self.mods:
             product = mod(product)
-        
+
         if isinstance(product, type):
             # If the product isn't mastered yet, master it.
             product = product(parent=parent, *args, **kwargs)

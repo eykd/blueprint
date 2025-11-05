@@ -1,24 +1,17 @@
-# -*- coding: utf-8 -*-
 """blueprint -- magical blueprints for procedural generation of content.
 
 Based roughly on http://www.squidi.net/mapmaker/musings/m100402.php
 """
 
-from blueprint._version import VERSION
-
-import blueprint.base as base
-import blueprint.fields as fields
 import blueprint.taggables as mods
-import blueprint.factories as factories
-import blueprint.mods as mods
-import blueprint.dice as dice
-import blueprint.collection as collection
+from blueprint import base, collection, dice, factories, fields, mods
+from blueprint._version import VERSION
 from blueprint.base import *
-from blueprint.fields import *
-from blueprint.mods import *
-from blueprint.factories import *
-from blueprint.markov import *
 from blueprint.collection import *
+from blueprint.factories import *
+from blueprint.fields import *
+from blueprint.markov import *
+from blueprint.mods import *
 
 __all__ = (
     list(base.__all__)

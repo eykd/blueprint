@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 """blueprint.dice -- a magic bag of dice.
 """
 import re
 
-__all__ = ['roll', 'dcompile']
+__all__ = ['dcompile', 'roll']
 
 try:
     _ = xrange
@@ -75,6 +74,7 @@ class results(list):
         return self._convert(b) / b
 
     __truediv__ = __div__
+
     def __floordiv__(self, b):
         return self._convert(b) // b
 
@@ -101,11 +101,11 @@ def dcompile(dice_expr):
     ``eval``.
     """
     assert safe_cp.match(dice_expr), 'Invalid dice expression: %s' % dice_expr
-    expr = dice_cp.sub('results(random.randint(1, \g<sides>) '
-                       'for x in xrange(\g<num>))',
+    expr = dice_cp.sub(r'results(random.randint(1, \g<sides>) '
+                       r'for x in xrange(\g<num>))',
                        dice_expr)
     expr = fudge_cp.sub(('results(random.choice([-1, -1, 0, 0, 1, 1]) '
-                         'for x in xrange(\g<num>))'),
+                         r'for x in xrange(\g<num>))'),
                         expr)
     return compile(expr, 'dice_expression: (%s)' % dice_expr, 'eval')
 

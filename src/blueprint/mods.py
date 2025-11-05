@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 """blueprint.mods -- blueprint modifiers.
 """
-from . import base
 import copy
+
+from . import base
 
 __all__ = ['Mod']
 
@@ -27,14 +27,14 @@ class Mod(base.Blueprint):
         >>> 2 <= item.value <= 10
         True
     """
+
     def __new__(cls, source=None, *args, **kwargs):
         base_mod = super(Mod, cls).__new__(cls, *args, **kwargs)
         if source is None:
             return base_mod
-        else:
-            base_mod.meta.source = source
-            base_mod.__init__(*args, **kwargs)
-            return base_mod(source)
+        base_mod.meta.source = source
+        base_mod.__init__(*args, **kwargs)
+        return base_mod(source)
 
     def __call__(self, source):
         if isinstance(source, type):

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """blueprint.markov -- Markov Chain generator.
 """
 import collections
@@ -23,9 +22,10 @@ class MarkovChain(fields.Field, Mapping):
 
     http://www.pick.ucam.org/~ptc24/mchain.html
     """
+
     def __init__(self, source_list, chainlen=2, max_length=10):
         if 1 > chainlen > 10:
-            raise ValueError("Chain length must be between 1 and 10, inclusive")
+            raise ValueError('Chain length must be between 1 and 10, inclusive')
         self._dict = collections.defaultdict(list)
         self.chainlen = chainlen
         self.max_length = max_length
@@ -33,7 +33,7 @@ class MarkovChain(fields.Field, Mapping):
 
     def next(self):
         return self.getRandomName()
-        
+
     def readData(self, names, destroy=False):
         if destroy:
             self._dict.clear()
@@ -43,27 +43,26 @@ class MarkovChain(fields.Field, Mapping):
 
         for name in names:
             oldnames.append(name)
-            spacer = u''.join((u" " * chainlen, name))
+            spacer = ''.join((' ' * chainlen, name))
             name_len = len(name)
             for num in xrange(name_len):
-                self.add_key(spacer[num:num+chainlen], spacer[num+chainlen])
-            self.add_key(spacer[name_len:name_len+chainlen], "\n")
+                self.add_key(spacer[num:num + chainlen], spacer[num + chainlen])
+            self.add_key(spacer[name_len:name_len + chainlen], '\n')
 
     def getRandomName(self, parent):
         """Return a random name.
         """
-        prefix = u" " * self.chainlen
-        name = u""
-        suffix = u""
+        prefix = ' ' * self.chainlen
+        name = ''
+        suffix = ''
         while 1:
             suffix = self.get_suffix(prefix, parent)
-            if suffix == u"-":
+            if suffix == '-':
                 continue
-            elif suffix == u"\n" or len(name) == self.max_length:
+            if suffix == '\n' or len(name) == self.max_length:
                 break
-            else:
-                name = u''.join((name, suffix))
-                prefix = u''.join((prefix[1:], suffix))
+            name = ''.join((name, suffix))
+            prefix = ''.join((prefix[1:], suffix))
         return name
 
     def __call__(self, parent):

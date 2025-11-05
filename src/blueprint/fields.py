@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """blueprint.fields
 """
-from collections import defaultdict
-import operator
-import re
-import pprint
 import inspect
+import operator
+import pprint
+import re
+from collections import defaultdict
 
 from . import dice
 
@@ -16,13 +15,25 @@ except NameError:
     xrange = range  # Python 3
     basestring = str
 
-__all__ = ['Field', 'RandomInt', 'Dice', 'DiceTable',
-           'PickOne', 'PickFrom', 'All',
-           'FormatTemplate', 'Property', 'WithTags',
-           'generator', 'depends_on', 'defer_to_end', 'resolve']
+__all__ = [
+    'All',
+    'Dice',
+    'DiceTable',
+    'Field',
+    'FormatTemplate',
+    'PickFrom',
+    'PickOne',
+    'Property',
+    'RandomInt',
+    'WithTags',
+    'defer_to_end',
+    'depends_on',
+    'generator',
+    'resolve',
+]
 
 
-class Field(object):
+class Field:
     """The base dynamic field class. Not very useful on its own.
 
     Subclasses of ``Field`` should define a ``__call__`` method::
@@ -35,6 +46,7 @@ class Field(object):
     When mastering a blueprint, any callable field on the blueprint
     will be called with one argument, the parent blueprint itself.
     """
+
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, str(self))
 
@@ -76,14 +88,13 @@ class Field(object):
         return FloorDivide(a, self)
 
 
-
-
 class _Operator(Field):
     """Base class for all operator fields.
     """
+
     op = None
     sym = ''
-    
+
     def __init__(self, *items):
         self.items = items
 
@@ -105,13 +116,13 @@ class _Operator(Field):
     def resolve(self, parent, item):
         if isinstance(item, _Operator):
             return item(parent)
-        else:
-            return resolve(parent, item)
+        return resolve(parent, item)
 
 
 class Add(_Operator):
     """When resolved, adds all the provided arguments and returns the result.
     """
+
     op = operator.add
     sym = '+'
 
@@ -119,6 +130,7 @@ class Add(_Operator):
 class Subtract(_Operator):
     """When resolved, subtracts all the provided arguments and returns the result.
     """
+
     op = operator.sub
     sym = '-'
 
@@ -126,6 +138,7 @@ class Subtract(_Operator):
 class Multiply(_Operator):
     """When resolved, multiplies all the provided arguments and returns the result.
     """
+
     op = operator.mul
     sym = '*'
 
@@ -133,6 +146,7 @@ class Multiply(_Operator):
 class Divide(_Operator):
     """When resolved, divides all the provided arguments and returns the result.
     """
+
     op = operator.truediv
     sym = '/'
 
@@ -140,6 +154,7 @@ class Divide(_Operator):
 class FloorDivide(_Operator):
     """When resolved, divides-with-truncation all the provided arguments and returns the result.
     """
+
     op = operator.floordiv
     sym = '//'
 
@@ -147,6 +162,7 @@ class FloorDivide(_Operator):
 class RandomInt(Field):
     """When resolved, returns a random integer between ``start`` and ``end``.
     """
+
     def __init__(self, start, end):
         self.start = start
         self.end = end
@@ -181,6 +197,7 @@ class Dice(Field):
         'sum(3d6) + max(3d10) # -> an integer result from the given expression
         'random.choice(3d6)'  # -> a random integer result chosen from 3 rolls.
     """
+
     def __init__(self, dice_expr, **local_kwargs):
         self.expr = dice_expr
         self.compiled_expr = dice.dcompile(dice_expr)
@@ -195,12 +212,12 @@ class Dice(Field):
 
 
 class DiceTable(Dice):
-    """
-    Same as a Dice field, but the result of evaluating the dice
+    """Same as a Dice field, but the result of evaluating the dice
     expression is used to select a value from a table.
     """
+
     range_sep_cp = re.compile(r'(?:\.\.)|[:]')
-    
+
     def __init__(self, dice_expr, table, default=None, **local_kwargs):
         super(DiceTable, self).__init__(dice_expr, **local_kwargs)
         self.table = defaultdict(lambda: default)
@@ -209,7 +226,7 @@ class DiceTable(Dice):
                 if self.range_sep_cp.search(key):
                     start_end = self.range_sep_cp.split(key)
                     start, end = int(start_end[0]), int(start_end[-1])
-                    for n in xrange(start, end+1):
+                    for n in xrange(start, end + 1):
                         self.table[str(n)] = value
                 else:
                     for i in key.split(','):
@@ -229,6 +246,7 @@ class DiceTable(Dice):
 class PickOne(Field):
     """When resolved, returns a random item from the arguments provided.
     """
+
     def __init__(self, *choices):
         self.choices = choices
 
@@ -243,6 +261,7 @@ class PickOne(Field):
 class PickFrom(Field):
     """When resolved, returns a random item from the collection provided.
     """
+
     def __init__(self, collection):
         self.collection = collection
 
@@ -257,6 +276,7 @@ class PickFrom(Field):
 class All(Field):
     """When resolved, returns a list of the provided items, themselves resolved.
     """
+
     def __init__(self, *items):
         self.items = items
 
@@ -293,8 +313,9 @@ class FormatTemplate(Field):
     >>> item.joke
     "Two men walked into a bar"
     """
+
     _defer_to_end = True
-    
+
     def __init__(self, template):
         self.template = template
 
@@ -304,7 +325,7 @@ class FormatTemplate(Field):
     def __get__(self, parent, type=None):
         if parent is None:
             return self
-        
+
         fields = {'meta': parent.meta,
                   'parent': parent}
         for name in parent.meta.fields:
@@ -335,11 +356,12 @@ class WithTags(Field):
     for others\". Tags without either prefix denote an AND (or
     interesction), that is, \"all blueprints must have this tag\".
     """
+
     def __init__(self, *tags):
         all_tags = set()
         for t in tags:
             all_tags.update(t.split())
-        
+
         self.with_tags = set()
         self.or_tags = set()
         self.not_tags = set()

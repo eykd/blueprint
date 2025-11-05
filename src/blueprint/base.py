@@ -1,20 +1,16 @@
-# -*- coding: utf-8 -*-
 """blueprint.base -- base metaclasses and other junk for blueprints.
 """
-from __future__ import absolute_import
-import re
-import inspect
 import copy
-from collections import deque
 import random
+import re
+from collections import deque
 
-from . import taggables
-from . import fields
+from . import fields, taggables
 
 __all__ = ['Blueprint']
 
 
-class Meta(object):
+class Meta:
     """Meta options for Blueprints.
 
     Default options include:
@@ -36,13 +32,14 @@ class Meta(object):
 
     - ``seed``: the seed used to initialize the ``random.Random`` instance.
     """
+
     def __init__(self):
         self.fields = set()
         self.mastered = False
         self.abstract = False
         self.source = None
         self.parent = None
-        
+
         self.random = random.Random()
         self.seed = random.random()
         self.random.seed(self.seed)
@@ -64,12 +61,14 @@ class Meta(object):
         memo[self] = meta
         return meta
 
+
 camelcase_cp = re.compile(r'[A-Z][^A-Z]+')
 
 
 class BlueprintMeta(type):
     """Metaclass for blueprints. Handles the declarative magic.
     """
+
     def __init__(cls, name, bases, attrs):
         if not hasattr(cls, 'tag_repo'):
             # This branch only executes when processing the mount point itself.
@@ -228,7 +227,7 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
                     resolved.add(name)
             else:
                 resolved.add(name)
-            
+
         for name in self.meta.fields:
             class_field = getattr(self.__class__, name)
             if hasattr(class_field, '_defer_to_end'):

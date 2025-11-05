@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 """blueprint.taggables -- tag repositories and query interface for selecting contained items.
 """
 import itertools
 import time
-
 from collections import defaultdict
 
-__all__ = ['AbstractTagSet', 'Taggable', 'TaggableClass', 'TagRepository', 'TagSet', 'resolve_tags']
+__all__ = ['AbstractTagSet', 'TagRepository', 'TagSet', 'Taggable', 'TaggableClass', 'resolve_tags']
 
 
 def resolve_tags(*tags):
@@ -16,12 +14,13 @@ def resolve_tags(*tags):
     return all_tags
 
 
-class AbstractTagSet(object):
+class AbstractTagSet:
     """Define methods for interacting with a local tag set.
     """
+
     def __iter__(self):
         return iter(self.all())
-    
+
     def queryTagsIntersection(self, *tags):
         objects = None
         for tag in resolve_tags(*tags):
@@ -81,7 +80,7 @@ class AbstractTagSet(object):
         with_tags = resolve_tags(*with_tags)
         or_tags = resolve_tags(*or_tags)
         not_tags = resolve_tags(*not_tags)
-        
+
         objects = self.queryTagsIntersection(*with_tags)
         if not_tags:
             objects = objects.queryTagsDifference(*not_tags)
@@ -92,21 +91,20 @@ class AbstractTagSet(object):
             for tag in obj.tags:
                 if tag in or_tags:
                     rank += 1
-                else:
-                    if tag not in with_tags:
-                        rank -= 1
+                elif tag not in with_tags:
+                    rank -= 1
             rankings.append(rank)
         # Python 3 zip is an iterator, ergo no itertools.izip available.)
-        ranks_objs = sorted(getattr(itertools, 'izip', zip)(rankings, objects), reverse=True, key=lambda v:v[0])
+        ranks_objs = sorted(getattr(itertools, 'izip', zip)(rankings, objects), reverse=True, key=lambda v: v[0])
         toprank = ranks_objs[0][0]
         how_many = rankings.count(toprank)
         top_contenders = [robj[1] for robj in ranks_objs[:how_many]]
-        
+
         if how_many == 1:
             winner = top_contenders[0]
         else:
             by_access = [(getattr(cntndr, 'last_picked', 0), cntndr) for cntndr in top_contenders]
-            by_access.sort(key = lambda v:v[0])
+            by_access.sort(key=lambda v: v[0])
             winner = by_access[0][1]
 
         winner.last_picked = time.time()
@@ -114,9 +112,10 @@ class AbstractTagSet(object):
         return winner
 
 
-class Taggable(object):
+class Taggable:
     """A taggable object.
     """
+
     def __init__(self, tag_repo, *tags):
         super(Taggable, self).__init__()
         self.tags = set(tags)
@@ -125,7 +124,7 @@ class Taggable(object):
         self.last_picked = 0.0
 
     def __repr__(self):
-        return "<%s: %s>" % (self.__class__.__name__, ' '.join(self.tags))
+        return '<%s: %s>' % (self.__class__.__name__, ' '.join(self.tags))
 
     @property
     def tag_repo(self):
@@ -154,11 +153,12 @@ class Taggable(object):
         return result
 
 
-class TaggableClass(object):
+class TaggableClass:
     """A taggable class object.
 
     Instances of such a class will not be tagged.
     """
+
     @classmethod
     def addTag(klass, *tags):
         klass.tag_repo.tagObject(klass, *tags)
@@ -173,6 +173,7 @@ class TaggableClass(object):
 class TagRepository(AbstractTagSet):
     """An example implementation for storing and querying tags.
     """
+
     def __init__(self, *objs):
         self.tag_objs = defaultdict(TagSet)
         self.addObject(*objs)
@@ -233,9 +234,10 @@ class TagSet(set, AbstractTagSet):
     Not nearly as efficient as querying taggables stored in a
     TagRepository, but useful.
     """
+
     def all(self):
         return self
-    
+
     def queryTag(self, tag):
         """Return all objects in the set that have the given tag.
         """
