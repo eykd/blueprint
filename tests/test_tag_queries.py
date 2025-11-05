@@ -3,8 +3,16 @@
 Converted from features/tag-queries.feature
 """
 
+from blueprint import taggables
 
-def test_tag_union_query(repo, t1, t2, t3, t4):
+
+def test_tag_union_query(
+    repo: taggables.TagRepository,
+    t1: taggables.Taggable,
+    t2: taggables.Taggable,
+    t3: taggables.Taggable,
+    t4: taggables.Taggable,
+) -> None:
     """Test tag union queries on repositories.
 
     Scenario: Tag Union Query
@@ -26,7 +34,13 @@ def test_tag_union_query(repo, t1, t2, t3, t4):
     assert t4 in q2
 
 
-def test_tag_intersection_query(repo, t1, t2, t3, t4):
+def test_tag_intersection_query(
+    repo: taggables.TagRepository,
+    t1: taggables.Taggable,
+    t2: taggables.Taggable,
+    t3: taggables.Taggable,
+    t4: taggables.Taggable,
+) -> None:
     """Test tag intersection queries on repositories.
 
     Scenario: Tag Intersection Query
@@ -48,7 +62,13 @@ def test_tag_intersection_query(repo, t1, t2, t3, t4):
     assert t4 not in q2
 
 
-def test_tag_difference_query(repo, t1, t2, t3, t4):
+def test_tag_difference_query(
+    repo: taggables.TagRepository,
+    t1: taggables.Taggable,
+    t2: taggables.Taggable,
+    t3: taggables.Taggable,
+    t4: taggables.Taggable,
+) -> None:
     """Test tag difference queries on repositories.
 
     Scenario: Tag Difference Query

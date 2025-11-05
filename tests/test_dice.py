@@ -23,7 +23,7 @@ import pytest
         '2dF',
     ],
 )
-def test_dice_rolling(dice_expr, min_sum, max_sum, min_roll, max_roll):
+def test_dice_rolling(dice_expr: str, min_sum: int, max_sum: int, min_roll: int, max_roll: int) -> None:
     """Test rolling dice with various expressions.
 
     Scenario Outline: Rolling dice

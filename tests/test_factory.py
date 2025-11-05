@@ -6,7 +6,9 @@ Converted from features/factory.feature
 import blueprint
 
 
-def test_factory_produces_magical_weapon(magical_item_prefix, of_doom):
+def test_factory_produces_magical_weapon(
+    magical_item_prefix: type[blueprint.Mod], of_doom: type[blueprint.Mod]
+) -> None:
     """Test that factories can produce mastered, modded blueprints.
 
     Scenario: Producing a mastered, modded blueprint

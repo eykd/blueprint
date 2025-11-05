@@ -5,6 +5,8 @@ particularly those that correspond to common @given steps from the
 original Behave test suite.
 """
 
+from typing import Any
+
 import pytest
 
 import blueprint
@@ -12,7 +14,7 @@ from blueprint import taggables
 
 
 @pytest.fixture(scope='module')
-def item():
+def item() -> type[blueprint.Blueprint]:
     """Create an Item blueprint class.
 
     Corresponds to: "When I subclass Blueprint"
@@ -29,7 +31,7 @@ def item():
 
 
 @pytest.fixture(scope='module')
-def weapon(item):
+def weapon(item: type[blueprint.Blueprint]) -> type[blueprint.Blueprint]:
     """Create a Weapon blueprint class.
 
     Corresponds to: "When I subclass Item"
@@ -47,7 +49,7 @@ def weapon(item):
 
 
 @pytest.fixture(scope='module')
-def spear(weapon):
+def spear(weapon: type[blueprint.Blueprint]) -> type[blueprint.Blueprint]:
     """Create a Spear weapon subclass.
 
     Corresponds to: "When I subclass Weapon several times"
@@ -63,7 +65,7 @@ def spear(weapon):
 
 
 @pytest.fixture(scope='module')
-def pointed_stick(weapon):
+def pointed_stick(weapon: type[blueprint.Blueprint]) -> type[blueprint.Blueprint]:
     """Create a PointedStick weapon subclass.
 
     Corresponds to: "When I subclass Weapon several times"
@@ -79,7 +81,7 @@ def pointed_stick(weapon):
 
 
 @pytest.fixture(scope='module')
-def club(weapon):
+def club(weapon: type[blueprint.Blueprint]) -> type[blueprint.Blueprint]:
     """Create a Club weapon subclass.
 
     Corresponds to: "When I subclass Weapon several times"
@@ -95,7 +97,7 @@ def club(weapon):
 
 
 @pytest.fixture
-def of_doom():
+def of_doom() -> type[blueprint.Mod]:
     """Create OfDoom mod class.
 
     Corresponds to: "When I subclass Mod"
@@ -110,7 +112,7 @@ def of_doom():
 
 
 @pytest.fixture
-def magical_item_prefix():
+def magical_item_prefix() -> type[blueprint.Mod]:
     """Create MagicalItemPrefix mod class.
 
     Corresponds to: "When I subclass Mod"
@@ -128,7 +130,7 @@ def magical_item_prefix():
 
 
 @pytest.fixture
-def _tag_repo_setup():
+def _tag_repo_setup() -> dict[str, Any]:
     """Internal fixture that creates a tag repository with test taggables.
 
     This is a private fixture used by the individual tag fixtures.
@@ -152,30 +154,30 @@ def _tag_repo_setup():
 
 
 @pytest.fixture
-def repo(_tag_repo_setup):
+def repo(_tag_repo_setup: dict[str, Any]) -> taggables.TagRepository:
     """Get the tag repository from the test setup."""
     return _tag_repo_setup['repo']
 
 
 @pytest.fixture
-def t1(_tag_repo_setup):
+def t1(_tag_repo_setup: dict[str, Any]) -> taggables.Taggable:
     """Get taggable t1 (tags: 'foo')."""
     return _tag_repo_setup['t1']
 
 
 @pytest.fixture
-def t2(_tag_repo_setup):
+def t2(_tag_repo_setup: dict[str, Any]) -> taggables.Taggable:
     """Get taggable t2 (tags: 'foo', 'bar')."""
     return _tag_repo_setup['t2']
 
 
 @pytest.fixture
-def t3(_tag_repo_setup):
+def t3(_tag_repo_setup: dict[str, Any]) -> taggables.Taggable:
     """Get taggable t3 (tags: 'foo', 'bar', 'baz')."""
     return _tag_repo_setup['t3']
 
 
 @pytest.fixture
-def t4(_tag_repo_setup):
+def t4(_tag_repo_setup: dict[str, Any]) -> taggables.Taggable:
     """Get taggable t4 (tags: 'boo')."""
     return _tag_repo_setup['t4']

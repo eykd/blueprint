@@ -3,8 +3,10 @@
 Converted from features/mods.feature
 """
 
+import blueprint
 
-def test_mod_creates_modified_blueprint(club, of_doom):
+
+def test_mod_creates_modified_blueprint(club: type[blueprint.Blueprint], of_doom: type[blueprint.Mod]) -> None:
     """Test that mods can modify other blueprints.
 
     Scenario: Modifying a blueprint
