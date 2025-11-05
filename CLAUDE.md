@@ -56,14 +56,8 @@ The codebase follows a metaclass-driven design with these key components:
 
 ### Testing
 ```bash
-# Run BDD tests with behave (legacy test suite)
-uv run behave
-
-# Run pytest tests (preferred for new tests)
+# Run pytest tests
 uv run pytest
-
-# Run tests with coverage
-uv run pytest --cov
 
 # Run a single test file
 uv run pytest tests/test_specific.py
@@ -126,7 +120,7 @@ weapon = blueprint.PickFrom(blueprint.WithTags('pointed weapon'))
 
 ## Code Style Notes
 
-- **Python version**: 3.11+ only (no Python 2.7 compatibility needed)
+- **Python version**: 3.11+
 - **Type hints**: Adding type hints is encouraged (mypy strict mode enabled)
 - **Formatting**: Ruff with single quotes for inline strings, double quotes for docstrings
 - **Line length**: 120 characters
@@ -135,15 +129,4 @@ weapon = blueprint.PickFrom(blueprint.WithTags('pointed weapon'))
 
 ## Testing Strategy
 
-- **BDD tests** (`features/`): Behavioral tests using behave framework
-  - `features/*.feature`: Gherkin scenarios
-  - `features/steps/*_steps.py`: Step implementations
-- **Doctests**: Embedded in module docstrings (especially in `base.py`, `fields.py`)
 - **pytest**: Configured but test directory not yet created (pytest.ini points to `tests/`)
-
-## Modernization Context
-
-This codebase is being modernized from Python 2.7 → Python 3.11+:
-- **Legacy**: Previously used `six` for metaclass compatibility
-- **Current**: Can now use native Python 3.11+ features
-- **Future**: Adding comprehensive type hints, migrating to pytest from behave

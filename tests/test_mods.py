@@ -1,0 +1,20 @@
+"""Tests for blueprint modification functionality.
+
+Converted from features/mods.feature
+"""
+
+
+def test_mod_creates_modified_blueprint(club, of_doom):
+    """Test that mods can modify other blueprints.
+
+    Scenario: Modifying a blueprint
+    - Apply OfDoom mod to Club
+    - Verify modified blueprint is still a Club instance
+    - Verify name has been modified
+    - Verify damage has been scaled appropriately
+    """
+    club_instance = of_doom(club)
+
+    assert isinstance(club_instance, club)
+    assert club_instance.name == 'Big Club of DOOM'
+    assert club_instance.damage >= 200, f'Expected damage >= 200, got {club_instance.damage}'
