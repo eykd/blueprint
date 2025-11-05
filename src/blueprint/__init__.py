@@ -27,8 +27,9 @@ from blueprint.fields import (
 from blueprint.markov import MarkovChain
 from blueprint.mods import Mod
 
+__version__ = VERSION
+
 __all__ = [
-    'VERSION',
     'All',
     'Blueprint',
     'BlueprintCollection',
@@ -44,6 +45,7 @@ __all__ = [
     'Property',
     'RandomInt',
     'WithTags',
+    '__version__',
     'base',
     'collection',
     'defer_to_end',

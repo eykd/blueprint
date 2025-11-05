@@ -42,7 +42,6 @@ path = "src/blueprint/_version.py"
 template = """
 VERSION = '{version}'
 """
-pattern = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/blueprint"]
