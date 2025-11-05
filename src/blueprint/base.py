@@ -1,4 +1,10 @@
-"""blueprint.base -- base metaclasses and other junk for blueprints."""
+"""Base metaclasses and core Blueprint implementation.
+
+This module provides the foundational classes for the Blueprint system:
+- Meta: Configuration and metadata container for Blueprint instances
+- BlueprintMeta: Metaclass that handles Blueprint class creation and tag registration
+- Blueprint: Base class for all blueprint templates with field resolution
+"""
 
 from __future__ import annotations
 
@@ -17,26 +23,26 @@ __all__ = ['Blueprint']
 
 
 class Meta:
-    """Meta options for Blueprints.
+    """Metadata container for Blueprint configuration and state.
 
-    Default options include:
+    This class stores metadata about Blueprint instances, including field tracking,
+    mastering state, hierarchy relationships, and random number generation settings.
 
-    - ``fields``: a set of the field names present on the blueprint.
+    Attributes:
+        fields: Set of field names present on the blueprint.
+        mastered: Flag indicating whether the blueprint has been mastered (instantiated
+            with all dynamic fields resolved to concrete values).
+        abstract: Flag indicating whether the blueprint is abstract. Abstract blueprints
+            are not added to the tag repository and won't appear in tag queries.
+        source: When a blueprint is modified (modded), this references the original
+            source blueprint or blueprint class.
+        parent: When a blueprint is nested inside another blueprint, this references
+            the parent blueprint instance.
+        random: Random number generator instance used for all random field resolution.
+        seed: Seed value used to initialize the random number generator. Can be a
+            string or float for reproducible generation.
+        kwargs: Additional keyword arguments passed during blueprint instantiation.
 
-    - ``mastered``: flag indicating whether the blueprint has been
-      mastered (i.e. instantiated).
-
-    - ``abstract``: flag indicating whether the blueprint is
-      abstract. Abstract blueprints don't show up in tag queries.
-
-    - ``source``: when a blueprint is modded, indicates the source blueprint.
-
-    - ``parent``: when a blueprint is nested inside another blueprint,
-      indicates the parent blueprint.
-
-    - ``random``: an instance of ``random.Random``, used for random number generation.
-
-    - ``seed``: the seed used to initialize the ``random.Random`` instance.
     """
 
     fields: set[str]
@@ -49,6 +55,12 @@ class Meta:
     kwargs: dict[str, Any]
 
     def __init__(self) -> None:
+        """Initialize Meta with default values.
+
+        Sets up default metadata state including empty field set, unmastered status,
+        concrete (non-abstract) type, no parent/source relationships, and a new
+        random number generator with a random seed.
+        """
         self.fields = set()
         self.mastered = False
         self.abstract = False
@@ -60,6 +72,20 @@ class Meta:
         self.random.seed(self.seed)
 
     def __deepcopy__(self, memo: dict[int, Any]) -> Meta:
+        """Create a deep copy of this Meta instance.
+
+        Special handling for certain attributes:
+        - source and parent are shallow-copied to preserve relationships
+        - random gets a new Random() instance to avoid shared state
+        - All other attributes are deep-copied
+
+        Args:
+            memo: Dictionary tracking already-copied objects to handle circular references.
+
+        Returns:
+            A new Meta instance with copied values.
+
+        """
         self_id = id(self)
         existing: Meta | None = memo.get(self_id)
         if existing is not None:  # pragma: no cover
@@ -81,7 +107,18 @@ camelcase_cp: re.Pattern[str] = re.compile(r'[A-Z][^A-Z]+')
 
 
 class BlueprintMeta(type):
-    """Metaclass for blueprints. Handles the declarative magic."""
+    """Metaclass that handles Blueprint class creation and tag registration.
+
+    This metaclass provides the declarative magic for Blueprint classes:
+    - Initializes tag repositories for direct Blueprint subclasses
+    - Auto-generates tags from CamelCase class names
+    - Inherits tags from parent blueprint classes
+    - Collects and tracks field definitions across the inheritance hierarchy
+    - Registers blueprint classes in their appropriate tag repository
+
+    The first direct subclass of Blueprint creates a new TagRepository, while
+    subsequent subclasses of that lineage share the same repository.
+    """
 
     tag_repo: taggables.TagRepository | None
     tags: set[str] | str
@@ -95,6 +132,25 @@ class BlueprintMeta(type):
         bases: tuple[type, ...],
         attrs: dict[str, Any],
     ) -> None:
+        """Initialize a new Blueprint class with tag repository and tag processing.
+
+        This method implements the mount point pattern for tag repositories:
+        - Direct Blueprint subclasses create a new TagRepository
+        - Indirect subclasses register themselves in their ancestor's repository
+
+        For registered blueprints, this method:
+        - Converts string tags to sets and adds the class name as a tag
+        - Extracts additional tags from CamelCase class names
+        - Inherits tags from parent blueprint classes
+        - Generates a human-readable name from the class name
+        - Registers the class in the appropriate tag repository
+
+        Args:
+            _name: Name of the class being created.
+            bases: Tuple of base classes.
+            attrs: Dictionary of class attributes.
+
+        """
         if not hasattr(cls, 'tag_repo'):
             # This branch only executes when processing the mount point itself.
             # So, since this is a new plugin type, not an implementation, this
@@ -126,6 +182,26 @@ class BlueprintMeta(type):
         bases: tuple[type, ...],
         attrs: dict[str, Any],
     ) -> BlueprintMeta:
+        """Create a new Blueprint class with field tracking and metadata setup.
+
+        This method creates the blueprint class structure by:
+        - Preserving special Python attributes (__new__, __classcell__)
+        - Processing the tags attribute
+        - Setting up Meta configuration from the user's Meta class
+        - Collecting field definitions (non-private, non-generator attributes)
+        - Inheriting field definitions from parent blueprints
+        - Contributing attributes to the class via add_to_class protocol
+
+        Args:
+            cls: The metaclass being used to create the new class.
+            name: Name of the new Blueprint class.
+            bases: Tuple of base classes.
+            attrs: Dictionary of class attributes being defined.
+
+        Returns:
+            The newly created Blueprint class.
+
+        """
         new = attrs.pop('__new__', None)
         classcell = attrs.pop('__classcell__', None)
         new_attrs: dict[str, Any] = {}
@@ -155,12 +231,31 @@ class BlueprintMeta(type):
         return new_class
 
     def add_to_class(cls, name: str, value: Any) -> None:  # noqa: ANN401
+        """Add an attribute to the Blueprint class with optional special handling.
+
+        If the value has a 'contribute_to_class' method, that method is called
+        to allow the value to customize how it's added to the class. Otherwise,
+        the value is set as a standard class attribute.
+
+        Args:
+            cls: The Blueprint class being modified.
+            name: The attribute name.
+            value: The value to add to the class.
+
+        """
         if hasattr(value, 'contribute_to_class'):
             value.contribute_to_class(cls, name)
         else:
             setattr(cls, name, value)
 
     def __repr__(cls) -> str:
+        """Return a detailed string representation of the Blueprint class.
+
+        Returns:
+            A multi-line string showing the class name and all its fields with
+            their current values, formatted for readability.
+
+        """
         return '<{}:\n    {}\n    >'.format(
             cls.__name__,
             '\n    '.join(
@@ -171,15 +266,29 @@ class BlueprintMeta(type):
 
 
 class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
-    """A magical blueprint.
+    """Base class for creating procedural generation templates with dynamic fields.
 
-    To create a blueprint, subclass Blueprint and add your
-    fields. Blueprints are automatically tagged by their class name
-    (CamelCase names are automatically split into components), and
-    inherit their ancestor blueprints' tags.
+    Blueprints are template classes that combine static and dynamic field definitions.
+    When instantiated, all dynamic fields (callables) are resolved to produce a
+    "mastered" blueprint with concrete values. This enables procedural generation
+    of game content, characters, items, and other structured data.
 
-    Example::
+    Key features:
+        - Automatic tagging from CamelCase class names (e.g., CaveMan → ['cave', 'man'])
+        - Tag inheritance from parent blueprint classes
+        - Field resolution with dependency tracking
+        - Reproducible generation via seeding
+        - Support for nested blueprints with parent relationships
 
+    To create a blueprint, subclass Blueprint and define fields:
+        - Static fields: assign plain values (strings, numbers, etc.)
+        - Dynamic fields: assign callable objects (functions, Field instances)
+        - Generator methods: use @generator decorator for methods that build final objects
+
+    Attributes:
+        meta: Metadata container with configuration and state information.
+
+    Example:
         >>> import blueprint as bp
 
         >>> class Item(bp.Blueprint):
@@ -200,11 +309,19 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
         1
         >>> 1 <= item.quality <= 6
         True
+
     """
 
     meta: Meta
 
     def __repr__(self) -> str:
+        """Return a detailed string representation of the mastered blueprint.
+
+        Returns:
+            A multi-line string showing the class name and all resolved field values,
+            formatted for readability.
+
+        """
         return '<{}:\n    {}\n    >'.format(
             self.__class__.__name__,
             '\n    '.join(
@@ -219,6 +336,24 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
         seed: str | float | None = None,
         **kwargs: Any,  # noqa: ANN401
     ) -> None:
+        """Initialize and master a blueprint instance.
+
+        Creates a "mastered" blueprint by:
+        - Deep copying the class metadata to create instance-specific metadata
+        - Setting up parent relationships if this is a nested blueprint
+        - Initializing the random number generator with a seed
+        - Applying any keyword argument overrides
+        - Resolving all dynamic fields to concrete values
+
+        Args:
+            parent: Optional parent blueprint for nested blueprints. If provided,
+                inherits the parent's seed unless explicitly overridden.
+            seed: Optional seed for reproducible random generation. If not provided,
+                uses parent's seed (if parent exists) or generates a random seed.
+            **kwargs: Additional keyword arguments to override field values. These
+                are set as instance attributes before field resolution.
+
+        """
         self.meta = copy.deepcopy(self.meta)
         if parent is not None:
             self.meta.parent = parent
@@ -237,7 +372,20 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
         self._resolve_fields()
 
     def _resolve_fields(self) -> None:
-        """Resolve all blueprint fields in the correct order."""
+        """Resolve all blueprint fields in dependency order.
+
+        This method processes fields in three passes:
+        1. Regular fields: Resolved in order, with deferred resolution for fields
+           with unmet dependencies (via @depends_on decorator).
+        2. Deferred fields: Fields with dependencies are resolved once their
+           dependencies are met, using a work queue approach.
+        3. End-deferred fields: Fields marked with @defer_to_end are resolved
+           last, after all other fields.
+
+        Static fields (non-callables) are marked as resolved immediately.
+        Dynamic fields (callables) are invoked via fields.resolve() to produce
+        concrete values.
+        """
         resolved: set[str] = set()
         deferred: deque[tuple[str, Callable[[Any], Any]]] = deque()
         deferred_to_end: deque[str] = deque()
@@ -278,5 +426,15 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
 
     @fields.generator
     def as_dict(self) -> dict[str, Any]:
-        """Return a dictionary of all mastered field values."""
+        """Return a dictionary of all mastered field values.
+
+        This is a generator method (marked with @generator decorator) and is not
+        automatically called during blueprint instantiation. It must be explicitly
+        invoked to produce the dictionary output.
+
+        Returns:
+            A dictionary mapping field names to their resolved values for this
+            mastered blueprint instance.
+
+        """
         return {n: getattr(self, n) for n in self.meta.fields}
