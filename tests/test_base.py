@@ -300,6 +300,32 @@ class TestBlueprint:
         assert item.a == 5
         assert item.b == 10  # type: ignore[comparison-overlap]
 
+    def test_blueprint_complex_deferred_chain(self) -> None:
+        """Test complex dependency chain that always uses deferred queue.
+
+        This test ensures that the deferred queue logic (lines 401, 418-419 in base.py)
+        is always exercised, regardless of set iteration order. With 5 fields in a
+        dependency chain, it's guaranteed that at least some fields will need to be
+        deferred during resolution.
+        """
+
+        class Item(blueprint.Blueprint):
+            # Create a longer chain of dependencies to ensure deferred queue is used
+            # e depends on d, d depends on c, c depends on b, b depends on a
+            field_e = blueprint.depends_on('field_d')(lambda self: self.field_d + 1)
+            field_d = blueprint.depends_on('field_c')(lambda self: self.field_c + 1)
+            field_c = blueprint.depends_on('field_b')(lambda self: self.field_b + 1)
+            field_b = blueprint.depends_on('field_a')(lambda self: self.field_a + 1)
+            field_a = 10
+
+        item = Item()
+        # Verify the chain resolved correctly
+        assert item.field_a == 10
+        assert item.field_b == 11  # type: ignore[comparison-overlap]
+        assert item.field_c == 12  # type: ignore[comparison-overlap]
+        assert item.field_d == 13  # type: ignore[comparison-overlap]
+        assert item.field_e == 14  # type: ignore[comparison-overlap]
+
     def test_blueprint_with_user_meta_options(self) -> None:
         """Test Blueprint with custom Meta options."""
 
