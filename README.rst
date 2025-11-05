@@ -244,24 +244,138 @@ submit a pull request. If you're not sure what you're doing, follow
 On github, bleeding-edge development works should be done on feature
 branches. ``master`` *should* always remain stable.
 
-Tests are written using the `behave`_ BDD framework, and may be found
-in the ``features/`` folder. To run the test suite, invoke ``behave``
-from the project root.
+Setup
+-----
 
-.. _behave: http://packages.python.org/behave/
+Blueprint uses `uv`_ for dependency management. To set up your
+development environment::
 
-If you're really high class, your code will be `PEP8`_ compliant, and
-will pass the `pep8 static checker`_ like so::
+    # Install dependencies (dev + test groups)
+    uv sync --group dev --group test
 
-    pep8 --ignore=E221,E701,E202,E203,E225,E251,E5,W291,W293 mymodule.py
+    # Install pre-commit hooks
+    uv run pre-commit install
 
-.. _PEP8: http://www.python.org/dev/peps/pep-0008/
-.. _pep8 static checker: http://pypi.python.org/pypi/pep8/
+.. _uv: https://docs.astral.sh/uv/
+
+Testing
+-------
+
+Tests are written using `pytest`_ and are located in the ``tests/``
+folder. Blueprint maintains **100% test coverage** (including branch
+coverage) and validates test independence with randomized execution
+order.
+
+To run the test suite::
+
+    # Run all tests with coverage
+    uv run pytest
+
+    # Run tests with randomized order (validates test independence)
+    uv run pytest --random-order
+
+    # Run the comprehensive test script (format, lint, type-check, test)
+    ./runtests.sh
+
+.. _pytest: https://docs.pytest.org/
+
+Code Quality
+------------
+
+Blueprint enforces strict code quality standards:
+
+- **Type checking**: All code is fully type-annotated and checked with
+  `mypy`_ in strict mode
+- **Linting**: Comprehensive linting with `ruff`_ (50+ rule groups enabled)
+- **Formatting**: Consistent code formatting with ruff
+- **Documentation**: Google-style docstrings with executable doctests
+
+To check code quality::
+
+    # Run type checker
+    uv run mypy src tests
+
+    # Run linter
+    uv run ruff check .
+
+    # Auto-fix linting issues
+    uv run ruff check --fix .
+
+    # Run formatter
+    uv run ruff format .
+
+    # Run all pre-commit hooks manually
+    uv run pre-commit run --all-files
+
+.. _mypy: https://www.mypy-lang.org/
+.. _ruff: https://docs.astral.sh/ruff/
 
 
 =========
 CHANGELOG
 =========
+
+- **0.7**: Major modernization release with comprehensive quality improvements:
+
+  - **Breaking changes:**
+
+    - **Dropped Python 2.7 support**: Minimum Python version is now 3.11+.
+
+    - **Method naming convention**: Changed from camelCase to snake_case for
+      internal methods (e.g., ``_getMaster()`` → ``_get_master()``). Public
+      API field classes (``PickOne``, ``PickFrom``, etc.) remain unchanged.
+
+    - **Comparison methods**: Replaced ``__cmp__`` with total ordering
+      (``__lt__``, ``__le__``, ``__eq__``, ``__ge__``, ``__gt__``) for
+      Python 3 compatibility.
+
+  - **Quality improvements:**
+
+    - **100% test coverage**: Achieved complete branch coverage with
+      comprehensive test suite.
+
+    - **Full type annotations**: All code is now fully type-annotated and
+      validated with mypy in strict mode. Package includes ``py.typed``
+      marker for downstream type checking.
+
+    - **Comprehensive linting**: Enforced via ruff with 50+ rule groups
+      enabled, ensuring consistent code style and catching potential issues.
+
+    - **Doctest integration**: All code examples in docstrings are now
+      executable and validated during testing.
+
+    - **Test independence**: Validated with pytest-random-order to ensure
+      tests can run in any order without dependencies.
+
+  - **Infrastructure improvements:**
+
+    - **Modern tooling**: Migrated from setuptools to uv + hatchling for
+      faster, more reliable builds.
+
+    - **Src layout**: Adopted modern src/ layout for better packaging
+      practices.
+
+    - **Pre-commit hooks**: Added automated formatting, linting, and type
+      checking before commits.
+
+    - **GitHub Actions CI**: Automated testing on Python 3.11, 3.12, and
+      3.13.
+
+    - **Dynamic versioning**: Improved version handling with
+      uv-dynamic-versioning.
+
+  - **Bug fixes:**
+
+    - Fixed abstract blueprints being incorrectly included in tag
+      repositories.
+
+    - Removed test ordering dependencies that could cause flaky test
+      failures.
+
+    - Improved dice compilation and random number generation consistency.
+
+  - **Testing framework**: Migrated from behave (BDD) to pytest with modern
+    fixtures and parametrization.
 
 - **0.6.1**: Fixed Python 3 compatibility in dice roller.
 
