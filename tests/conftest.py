@@ -13,7 +13,7 @@ import blueprint
 from blueprint import taggables
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def item() -> type[blueprint.Blueprint]:
     """Create an Item blueprint class.
 
@@ -30,7 +30,7 @@ def item() -> type[blueprint.Blueprint]:
     return Item
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def weapon(item: type[blueprint.Blueprint]) -> type[blueprint.Blueprint]:
     """Create a Weapon blueprint class.
 
@@ -48,7 +48,7 @@ def weapon(item: type[blueprint.Blueprint]) -> type[blueprint.Blueprint]:
     return Weapon
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def spear(weapon: type[blueprint.Blueprint]) -> type[blueprint.Blueprint]:
     """Create a Spear weapon subclass.
 
@@ -64,7 +64,7 @@ def spear(weapon: type[blueprint.Blueprint]) -> type[blueprint.Blueprint]:
     return Spear
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def pointed_stick(weapon: type[blueprint.Blueprint]) -> type[blueprint.Blueprint]:
     """Create a PointedStick weapon subclass.
 
@@ -80,7 +80,7 @@ def pointed_stick(weapon: type[blueprint.Blueprint]) -> type[blueprint.Blueprint
     return PointedStick
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def club(weapon: type[blueprint.Blueprint]) -> type[blueprint.Blueprint]:
     """Create a Club weapon subclass.
 

@@ -9,7 +9,10 @@ import blueprint
 
 
 def test_factory_produces_magical_weapon(
-    magical_item_prefix: type[blueprint.Mod], of_doom: type[blueprint.Mod], weapon: type[blueprint.Blueprint]
+    magical_item_prefix: type[blueprint.Mod],
+    of_doom: type[blueprint.Mod],
+    weapon: type[blueprint.Blueprint],
+    spear: type[blueprint.Blueprint],
 ) -> None:
     """Test that factories can produce mastered, modded blueprints.
 
