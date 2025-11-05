@@ -6,7 +6,7 @@ set -x
 uv run ruff check --fix --unsafe-fixes --ignore T100  --ignore ERA001
 uv run ruff format
 uv run mypy src tests
-uv run  --env-file=.env.test \
+uv run  \
    pytest \
    -vv \
    --new-first \
