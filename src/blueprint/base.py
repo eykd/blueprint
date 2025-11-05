@@ -173,7 +173,7 @@ class BlueprintMeta(type):
                     base_tags = base.tags
                     if isinstance(base_tags, set):
                         cls.tags.update(base_tags)
-            if cls.tag_repo is not None:  # pragma: no branch
+            if cls.tag_repo is not None and not cls.meta.abstract:  # pragma: no branch
                 cls.tag_repo.add_object(cls)  # type: ignore[arg-type]
 
     def __new__(
