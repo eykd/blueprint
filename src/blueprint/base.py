@@ -4,6 +4,10 @@ import copy
 import random
 import re
 from collections import deque
+from typing import TYPE_CHECKING, Any, Optional
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 from . import fields, taggables
 
@@ -33,6 +37,15 @@ class Meta:
     - ``seed``: the seed used to initialize the ``random.Random`` instance.
     """
 
+    fields: set[str]
+    mastered: bool
+    abstract: bool
+    source: Optional['Blueprint']
+    parent: Optional['Blueprint']
+    random: random.Random
+    seed: float
+    kwargs: dict[str, Any]
+
     def __init__(self) -> None:
         self.fields = set()
         self.mastered = False
@@ -40,14 +53,14 @@ class Meta:
         self.source = None
         self.parent = None
 
-        self.random = random.Random()
-        self.seed = random.random()
+        self.random = random.Random()  # noqa: S311
+        self.seed = random.random()  # noqa: S311
         self.random.seed(self.seed)
 
-    def __deepcopy__(self, memo):
-        not_there = []
-        existing = memo.get(self, not_there)
-        if existing is not not_there:
+    def __deepcopy__(self, memo: dict[int, Any]) -> 'Meta':
+        self_id = id(self)
+        existing: Meta | None = memo.get(self_id)
+        if existing is not None:
             return existing
 
         meta = Meta()
@@ -55,20 +68,31 @@ class Meta:
             if name in {'source', 'parent'}:
                 setattr(meta, name, value)
             elif name == 'random':
-                meta.random = random.Random()
+                meta.random = random.Random()  # noqa: S311
             else:
                 setattr(meta, name, copy.deepcopy(value, memo))
-        memo[self] = meta
+        memo[self_id] = meta
         return meta
 
 
-camelcase_cp = re.compile(r'[A-Z][^A-Z]+')
+camelcase_cp: re.Pattern[str] = re.compile(r'[A-Z][^A-Z]+')
 
 
 class BlueprintMeta(type):
     """Metaclass for blueprints. Handles the declarative magic."""
 
-    def __init__(cls, name, bases, attrs) -> None:
+    tag_repo: taggables.TagRepository | None
+    tags: set[str] | str
+    name: str
+    last_picked: float
+    meta: Meta
+
+    def __init__(
+        cls,
+        _name: str,
+        bases: tuple[type, ...],
+        attrs: dict[str, Any],
+    ) -> None:
         if not hasattr(cls, 'tag_repo'):
             # This branch only executes when processing the mount point itself.
             # So, since this is a new plugin type, not an implementation, this
@@ -79,7 +103,8 @@ class BlueprintMeta(type):
             # This must be a plugin implementation, which should be registered.
             # Simply appending it to the list is all that's needed to keep
             # track of it later.
-            cls.tags = set(cls.tags.split())
+            if isinstance(cls.tags, str):
+                cls.tags = set(cls.tags.split())
             cls.tags.add(cls.__name__)
             cls.tags.update(t.lower() for t in camelcase_cp.findall(cls.__name__))
             cls.last_picked = 0.0
@@ -87,13 +112,21 @@ class BlueprintMeta(type):
                 cls.name = ' '.join(camelcase_cp.findall(cls.__name__))
             for base in bases:
                 if hasattr(base, 'tags'):
-                    cls.tags.update(base.tags)
-            cls.tag_repo.add_object(cls)
+                    base_tags = base.tags
+                    if isinstance(base_tags, set):
+                        cls.tags.update(base_tags)
+            if cls.tag_repo is not None:
+                cls.tag_repo.add_object(cls)  # type: ignore[arg-type]
 
-    def __new__(cls, name, bases, attrs):
+    def __new__(
+        cls: type['BlueprintMeta'],
+        name: str,
+        bases: tuple[type, ...],
+        attrs: dict[str, Any],
+    ) -> 'BlueprintMeta':
         new = attrs.pop('__new__', None)
         classcell = attrs.pop('__classcell__', None)
-        new_attrs = {}
+        new_attrs: dict[str, Any] = {}
         if new is not None:
             new_attrs['__new__'] = new
         if classcell is not None:
@@ -114,12 +147,12 @@ class BlueprintMeta(type):
                 meta.fields.update(base.meta.fields)
 
         # Transfer the rest of the attributes.
-        for name, value in attrs.items():
-            new_class.add_to_class(name, value)
+        for attr_name, value in attrs.items():
+            new_class.add_to_class(attr_name, value)
 
         return new_class
 
-    def add_to_class(cls, name, value) -> None:
+    def add_to_class(cls, name: str, value: Any) -> None:  # noqa: ANN401
         if hasattr(value, 'contribute_to_class'):
             value.contribute_to_class(cls, name)
         else:
@@ -167,6 +200,8 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
         True
     """
 
+    meta: Meta
+
     def __repr__(self) -> str:
         return '<{}:\n    {}\n    >'.format(
             self.__class__.__name__,
@@ -176,7 +211,12 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
             ),
         )
 
-    def __init__(self, parent=None, seed=None, **kwargs) -> None:
+    def __init__(
+        self,
+        parent: Optional['Blueprint'] = None,
+        seed: float | None = None,
+        **kwargs: Any,  # noqa: ANN401
+    ) -> None:
         self.meta = copy.deepcopy(self.meta)
         if parent is not None:
             self.meta.parent = parent
@@ -186,19 +226,22 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
         elif parent is not None:
             self.meta.seed = parent.meta.seed
         else:
-            self.meta.seed = random.random()
+            self.meta.seed = random.random()  # noqa: S311
         self.meta.random.seed(self.meta.seed)
         self.meta.kwargs = kwargs
         for name, value in kwargs.items():
             setattr(self, name, value)
 
-        # Resolve any unresolved fields.
-        resolved = set()
-        deferred = deque()
-        deferred_to_end = deque()
-        deferred_to_end_names = set()
+        self._resolve_fields()
 
-        def resolve(name, field) -> None:
+    def _resolve_fields(self) -> None:
+        """Resolve all blueprint fields in the correct order."""
+        resolved: set[str] = set()
+        deferred: deque[tuple[str, Callable[[Any], Any]]] = deque()
+        deferred_to_end: deque[str] = deque()
+        deferred_to_end_names: set[str] = set()
+
+        def resolve(name: str, field: Any) -> None:  # noqa: ANN401
             # print "Can we resolve", name
             if callable(field):
                 if hasattr(field, 'depends_on') and not field.depends_on.issubset(resolved):
@@ -235,5 +278,6 @@ class Blueprint(taggables.TaggableClass, metaclass=BlueprintMeta):
             resolve(name, field)
 
     @fields.generator
-    def as_dict(self):
+    def as_dict(self) -> dict[str, Any]:
+        """Return a dictionary of all mastered field values."""
         return {n: getattr(self, n) for n in self.meta.fields}
