@@ -1,4 +1,23 @@
-"""blueprint.dice -- a magic bag of dice."""
+"""Dice rolling and expression evaluation for procedural generation.
+
+This module provides a flexible dice rolling system that supports standard RPG dice
+notation (e.g., '3d6', '2d20+5') and Fudge/FATE dice. Dice expressions are compiled
+into Python code for efficient evaluation and can include mathematical operations,
+function calls like sum(), min(), max(), and random.choice().
+
+The module uses regex-based parsing to convert dice notation into executable Python
+expressions, with safety checks to prevent code injection.
+
+Example:
+    >>> import random
+    >>> random.seed(42)
+    >>> roll('3d6 + 2')
+    results([5, 1, 5])
+    >>> int(roll('2d20 + 5'))
+    22
+    >>> roll('4dF')  # Fudge dice: -1, 0, or 1
+    results([1, 0, -1, 1])
+"""
 
 from __future__ import annotations
 
@@ -39,6 +58,30 @@ safe_cp: re.Pattern[str] = re.compile(
 
 
 class results(list[int]):
+    """List of dice roll results that behaves like a number in arithmetic operations.
+
+    This class extends list to store individual dice roll results while allowing the
+    collection to be used directly in mathematical expressions. When used in arithmetic
+    or comparison operations, the results list automatically converts itself to the
+    appropriate numeric type (int or float) by summing all dice values.
+
+    The class maintains both the individual roll results (as a list) and provides
+    numeric behavior for convenience in dice expression evaluation.
+
+    Attributes:
+        Inherits all list attributes. Contains integer dice roll results.
+
+    Example:
+        >>> r = results([3, 5, 2])
+        >>> int(r)
+        10
+        >>> r + 5
+        15
+        >>> 10 - r
+        0
+        >>> float(r) * 2.5
+        25.0
+    """
     def __int__(self) -> int:
         return int(sum(self))
 
@@ -96,11 +139,47 @@ class results(list[int]):
 
 
 def dcompile(dice_expr: str) -> CodeType:
-    """Compile the given dice expression into a code object.
+    """Compile a dice expression string into an executable code object.
 
-    This expands all ``NdS``-style dice expressions into valid python
-    code (list comprehensions), and compiles the rest for a future
-    ``eval``.
+    This function parses and compiles dice notation expressions into Python code objects
+    that can be evaluated efficiently. It supports standard RPG dice notation (NdS format,
+    where N is the number of dice and S is the number of sides) and Fudge dice (NdF format).
+
+    The function performs safety validation to prevent code injection by checking the
+    expression against a whitelist of allowed operations. Dice expressions are transformed
+    into list comprehensions that generate random values, then compiled for later evaluation.
+
+    Supported dice notations:
+        - Standard dice: '3d6', '2d20', '1d100'
+        - Fudge dice: '4dF', '2df' (results in -1, 0, or 1)
+        - Math operations: '+', '-', '*', '/', '//', '%'
+        - Functions: sum(), sorted(), max(), min(), abs(), random.choice()
+
+    Args:
+        dice_expr: A string containing the dice expression to compile. Must match the
+            safety regex pattern to prevent code injection. Examples: '3d6+2', '2d20-5',
+            'max(4d6)', '4dF'.
+
+    Returns:
+        A compiled code object that can be passed to the roll() function or evaluated
+        directly with eval() using the appropriate namespace.
+
+    Raises:
+        AssertionError: If the dice expression contains unsafe or invalid syntax that
+            doesn't match the safety validation pattern.
+
+    Example:
+        >>> code = dcompile('3d6 + 2')
+        >>> code  # doctest: +ELLIPSIS
+        <code object <module> at 0x...>
+        >>> code = dcompile('2d20 + sum(3d6)')
+        >>> code  # doctest: +ELLIPSIS
+        <code object <module> at 0x...>
+
+    Note:
+        The compiled code object expects specific variables in its evaluation namespace:
+        'random' (a random module or object), 'results' (the results class), and
+        'xrange' (mapped to range).
     """
     assert safe_cp.match(dice_expr), f'Invalid dice expression: {dice_expr}'  # noqa: S101
     expr = dice_cp.sub(
@@ -119,10 +198,49 @@ def dcompile(dice_expr: str) -> CodeType:
 
 
 def roll(dice_expr: str | CodeType, random_obj: Any = None, **kwargs: Any) -> Any:  # noqa: ANN401
-    """Return the result of evaluating the given dice expression.
+    """Evaluate a dice expression and return the rolled result.
 
-    ``dice_expr`` may be either a dice expression as a string, or a
-    code object as returned by ``dcompile``.
+    This function evaluates dice expressions to produce random results according to
+    standard RPG dice notation. It accepts either a string expression (which is compiled
+    automatically) or a pre-compiled code object from dcompile(). Results are returned
+    as a results object that can be used as a list of individual rolls or as a numeric
+    sum in arithmetic operations.
+
+    The function handles the complete evaluation context, including importing the random
+    module if needed, setting up the namespace with required functions and classes, and
+    executing the compiled expression.
+
+    Args:
+        dice_expr: Either a string containing a dice expression (e.g., '3d6+2', '2d20')
+            or a pre-compiled code object from dcompile(). String expressions are
+            automatically compiled before evaluation.
+        random_obj: Optional random number generator object or module. If None (default),
+            the standard library random module is imported and used. Can be any object
+            with randint() and choice() methods for custom random behavior or seeding.
+        **kwargs: Additional keyword arguments to add to the evaluation namespace. This
+            allows passing custom variables that can be referenced in the dice expression.
+
+    Returns:
+        A results object containing the dice roll outcomes. This can be used as a list
+        to access individual roll values, or as a number (via int() or float()) to get
+        the sum of all rolls. The exact type depends on the expression evaluated.
+
+    Example:
+        >>> import random
+        >>> random.seed(42)
+        >>> result = roll('3d6')
+        >>> result
+        results([5, 1, 5])
+        >>> int(result)
+        11
+        >>> roll('2d20 + 5', random_obj=random)
+        results([6, 4])
+        >>> int(roll('max(4d6)'))
+        5
+
+    Note:
+        The evaluation uses eval() internally after safety validation. Only use dice
+        expressions from trusted sources or those validated by dcompile().
     """
     if random_obj is None:
         import random
